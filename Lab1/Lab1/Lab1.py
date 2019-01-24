@@ -117,18 +117,25 @@ def spectrogram(sample,fs,N):
         time[n] = t
     return SHann,SBlack,f,time
 
-def spectralCentroid(sp,N):
-    # THESE ARE IN DECIBELS...
-    nframes = np.shape(sp)[1]
+def spectralCentroid(sample,fs,N):
+    nframes = int(len(sample)/N)
+    SP = np.zeros([nframes,int(N/2)])
+    # Generate Blackman window
+    wBlack = scipy.signal.get_window('blackman',N-1,False)
+    # Generate a spectrogram matrix
+    for n in range(nframes):
+        f,t,sp = np.transpose(scipy.signal.spectrogram(sample[n*N:n*N+(N-1)],fs,wBlack,mode='magnitude'))
+        SP[n,:] = np.transpose(sp)
     frange = np.shape(sp)[0]
     P = np.zeros([nframes,frange])
     # Loop over FFT frames
     for n in range(nframes):
         # calculate sum of all frequency components in this frame
-        sfreq = sum(sp[0:frange,n])
+        sfreq = sum(SP[n,0:frange])
         # for each frequency bin, calculate the relative 'probability' of that frequency
         for k in range(frange):
-            P[n,k] = sp[k,n]/sfreq
+            P[n,k] = SP[n,k]/sfreq
+            
     return P,N
 
 # UI dialog to select files -> selection of multiple files will run all functions for each file
@@ -189,7 +196,7 @@ for f in files:
     plt.savefig('figs/powerHann_'+filename)
     plt.close()
 
-    dft = spectralCentroid(spectroBlack,512)
+    dft = spectralCentroid(songSample,fs,512)
 
 print('done')
     
