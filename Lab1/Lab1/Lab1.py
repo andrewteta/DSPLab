@@ -164,7 +164,7 @@ def spectralCentroid(sample,fs,N):
 #   N = frame size
 # Output:
 #   arg1 = vector of length nframes of spectral flatness
-#   arg3 = length of output vectors = nframes
+#   arg2 = length of output vectors = nframes
 # =============================================================================
 def flatness(sample,fs,N):
     nframes = int(len(sample)/N)
@@ -196,6 +196,17 @@ def flux(P):
         F[n] = sum((P[n,:]-P[n-1,:])**2)
     return F
 
+# =============================================================================
+# Input:
+#   SP = audio sample spectrogram
+#   f = list of frequency values with size = range of frequency bins in SP
+#   n = frame index of SP
+#   fs = sampling frequency of audio sample
+#   nBanks = number of mel filter banks to generate
+# Output:
+#   arg1 = N_B x K (K = len(f)) matrix of filter values for H_p
+#   arg2 = matrix of filter banks, size = nBnaks x len(f)
+# =============================================================================
 def mfcc(SP,f,n,fs,nBanks):
     mel_min = 1127.01048*math.log(1 + 20/700)
     omega_min = (math.e**(mel_min/1127.01048) - 1) * 700
@@ -220,8 +231,11 @@ def mfcc(SP,f,n,fs,nBanks):
     h = np.zeros([nBanks,frange])
     plt.figure(figsize=(8,4),dpi=170)
     plt.ylabel('Magnitude')
-    plt.xlabel('Frequency (dB)')
+    plt.xlabel('Frequency (Hz)')
     plt.title('Mel Filter Banks')
+    tick = np.arange(0,len(f),25)
+    label = np.around(tick*fs/512)
+    plt.xticks(tick,label)
     for p in range(nBanks):
         omegaC = omega[p]
         omegaL = omega[p-1]
@@ -280,6 +294,10 @@ for f in files:
 
     mel = mfcc(spectroBlack,freqAxis,1,fs,40)
 
+    # Generate frequencies axis labels
+    tick = np.arange(0,len(freqAxis),25)
+    label = np.around(tick*fs/512)
+
     # save figures
     plt.figure(figsize=(8,4),dpi=170)
     plt.imshow(spectroHann, cmap='inferno')
@@ -287,7 +305,8 @@ for f in files:
     plt.colorbar(shrink=0.5).set_label('Magnitude (dB)')
     plt.title('Hann Window Spectrogram: '+filename)
     plt.xlabel('FFT Frame')
-    plt.ylabel('Frequency (bins)')
+    plt.ylabel('Frequency (Hz)')
+    plt.yticks(tick,label)
     plt.savefig('figs/powerHann_'+filename)
     plt.close()
 
@@ -297,7 +316,8 @@ for f in files:
     plt.colorbar(shrink=0.5).set_label('Magnitude (dB)')
     plt.title('Blackman Window Spectrogram: '+filename)
     plt.xlabel('FFT Frame')
-    plt.ylabel('Frequency (bins)')
+    plt.ylabel('Frequency (Hz)')
+    plt.yticks(tick,label)
     plt.savefig('figs/powerBlack_'+filename)
     plt.close()
 

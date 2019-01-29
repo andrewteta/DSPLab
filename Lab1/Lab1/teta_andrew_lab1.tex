@@ -13,6 +13,8 @@
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{listings}
 \usepackage{color}
+
+\setlength{\jot}{10pt}
  
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -198,27 +200,57 @@ See section \ref{app:zcr} for Python implementation.
 \paragraph*{} Sound, by nature is made up of many different frequencies or notes of different pitch. Thus it is natural to analyze audio in the spectral (frequency) domain. 
 \paragraph{Method} As discussed in the introduction, we will accomplish our spectral analysis using a STFT, which decomposes short-time frames of a signal into discrete frequency bins, maintaining some time-domain relevance within the spectral domain. Then, we will perform some statistical analysis on the signal in an attempt to characterize some songs.
 \paragraph*{} Rather than directly splitting each of our $N=512$ frames, we will convolve (a fancy term for multiplication in the frequency domain) a taper window, $w$, with the signal and take the Fourier transform (FT). Since the signal is real, and we are concerned only with the magnitude, we will compute the FT of only half of the frequency spectrum to arrive at $N/2=256$ frequency bins for each of our $N=512$ frames. Finally, for the purposes of this analysis, we are interested in the power spectrum of the original song, so we take the magnitude squared (i.e. $|X_n(k)|^2$, as a function of the frame index $n$ and frequency index $k$). See section \ref{app:frequencydomain} for Python implementation.
-\paragraph*{} To give some motivation for the taper window, $w$, we will derive the theoretical discrete-time Fourier transform (DTFT) for a given signal $x[n]$ where,
+\paragraph{DTFT Window Derivation} To give some motivation for the taper window, $w$, we will derive the theoretical discrete-time Fourier transform (DTFT) for a given signal $x[n]$ where,
 
-\begin{align*}
+\begin{align} \label{eqn:rect}
 x[n] &= 1, && -N/2 \leq n \leq N/2 \\
 x[n] &= 0, && \text{else}
-\end{align*}
+\end{align}
 
 Recall the definition of the DTFT.
 
-\begin{equation} \label{eq:dtft}
+\begin{equation} \label{eqn:dtft}
 X(\omega)=\sum_{n=-\infty}^{\infty} x[n]e^{-j\omega n}.
 \end{equation}
 
-Since $x[n]\neq 0$ over only a subset of values in the DTFT range, equation \eqref{eq:dtft} becomes,
+Since $x[n]\neq 0$ over only a subset of values in the DTFT range, equation \eqref{eqn:dtft} becomes,
 
-\begin{align*}
-X(\omega) &= \sum_{n=-N/2}^{N/2} x[n]e^{-j\omega n} \\
-		  &= \sum_{n=-N/2}^{N/2} e^{-j\omega n} 
-\end{align*}
+\begin{align}
+X(\omega) &= \sum_{n=-N/2}^{N/2} x[n]e^{-j\omega n}  \nonumber \\
+		  &= \sum_{n=-N/2}^{N/2} \left(e^{-j\omega}\right)^n &\text{which we can rewrite as} &\text{(a geometric series)} \nonumber \\
+		  &= e^{j\omega N/2} \frac{1-\left(e^{-j\omega}\right)^{N+1}}{1-e^{-j\omega}} &\text{factoring,} \nonumber \\
+		  &= e^{j\omega N/2} \frac{e^{-j\omega (N+1)/2} \left( e^{j\omega (N+1)/2} - e^{-j\omega (N+1)/2} \right)}{e^{-j\omega/2} \left( e^{j\omega/2} - e^{-j\omega/2} \right)} \nonumber \\
+		  &= \frac{e^{j\omega (N+1)/2} - e^{-j\omega (N+1)/2}}{e^{j\omega/2} - e^{-j\omega/2}} &\text{and by Euler's formula,} \nonumber \\
+X(\omega) &= \frac{sin(\frac{\omega(N+1)}{2})}{sin(\frac{\omega}{2})} \label{eqn:sinc}
+\end{align}
 
-\clearpage
+\pagebreak
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{sinc}
+	\caption{Plot of \eqref{eqn:sinc} with $\omega=[-\pi,\pi]$ ($N=6$).}
+	\label{fig:sinc}
+\end{figure}
+
+Equation \eqref{eqn:sinc}, the magnitude of which is plotted in figure \ref{fig:sinc}, is easily recognized as the $sinc$ function. Notice the relatively large amplitude side-lobes. If we consider constant total energy of this function when used as a window, the narrow main-lobe will extract each frequency very selectively, with the side-lobes producing frequency leakage. In contrast, if we aim to extract frequencies with minimal leakage, we could choose a window with a wider main-lobe. In that case, the energy would be more concentrated at the central frequency, albeit less selectively. In this lab, we will focus on some windows that are relatively good approximations to a $sinc$ window, but with no side-lobes, so the frequency leakage is essentially eliminated. The tradeoff is that we produce a low-passed version of the original signal at the output of the window operation. 
+
+\paragraph{Windowing a Signal} The process of multiplying a signal $x[n]$ by a window $w[n]$ is relatively straightforward. We consider the operation in the time-domain and derive the frequency-domain equivalence.
+
+\begin{equation} \label{eqn:wintime}
+y[n] = x[n]w[n]
+\end{equation}
+
+Recall that multiplication in time is a convolution in frequency, such that 
+\begin{align}
+Y(\omega) 	&= X(\omega)*W(\omega) \nonumber \\
+			&= \sum_{k=-\infty}^{+\infty} W(\omega)X(\omega-k) \label{eqn:conv} \\
+			&= \sum_{k=-\pi}^{\pi} \frac{sin(\frac{\omega(N+1)}{2})}{sin(\frac{\omega}{2})}X(\omega-k) \label{eqn:windowed}
+\end{align}
+
+where \eqref{eqn:conv} is the definition of convolution\cite{convolution} and \eqref{eqn:windowed} is the output of the window operation in frequency. We will use this over a sequence of 'frames' of a DTFT algorithm in Python to generate a spectrogram of a signal.
+
+\pagebreak
 
 \subsection{Spectrogram} As promised, we will be implementing a STFT. In Python, we will use the \verb|scipy.signal.spectrogram| function to automate this. However, we first need a window. For this, we will use the library function, \verb|scipy.signal.get_window| which allows us to quickly generate taper windows of the same size as our STFT frames. There are many choices of windows, but we will look at the 'Hann' and 'Blackman' windows. See figure \ref{fig:windows}.
 
@@ -280,9 +312,25 @@ X(\omega) &= \sum_{n=-N/2}^{N/2} x[n]e^{-j\omega n} \\
 	\label{fig:windows_world}
 \end{figure}
 
-See section \ref{app:spectrogram}
+See section \ref{app:spectrogram} for implementation in Python.
 
-\paragraph{Comments} As far as I can tell, the two spectrograms produced by these two windows in figures \ref{fig:windows_classical} and \ref{fig:windows_world} are identical. We will proceed with analysis using only the Blackman window.
+\paragraph{Comments} If you look closely at figures \ref{fig:hannCrop} and \ref{fig:blackmanCrop}, you can see that there is more spectral bleeding in the Blackman window, however the magnitude of center frequencies is relatively higher. We will proceed with analysis using only the Blackman window.
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}[h]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{hannCrop}
+		\caption{Hann Window}
+		\label{fig:hannCrop}
+	\end{subfigure}
+	\begin{subfigure}[h]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{blackmanCrop}
+		\caption{Blackman Window}
+		\label{fig:blackmanCrop}
+	\end{subfigure}
+	\caption{A closer look at Hann and Blackman windows.}
+	\label{fig:windowCloseup}
+\end{figure}
 
 \pagebreak
 
@@ -415,7 +463,7 @@ A very small flatness corresponds to the presence of tonal components while a fl
 F_n = \sum_{k=0}^{K} (P_n(k)-P_{n-1}(k))^2
 \end{equation}
 
-Where $P_n(k)$ is the normalized frequency distribution for frame $n$, given by \ref{eqn:P}. Applying \ref{eqn:F} to the same three samples, the plots of figure \ref{fig:flux} were produced. See section \ref{app:flux} fr Python implementation.
+Where $P_n(k)$ is the normalized frequency distribution for frame $n$, given by \ref{eqn:P}. Applying \ref{eqn:F} to the same three samples, the plots of figure \ref{fig:flux} were produced. See section \ref{app:flux} for Python implementation.
 
 \begin{figure}[tb]
 	\centering
@@ -474,17 +522,17 @@ mel_p = 1127.01048*log(1+\Omega_p/700).
 The set of frequencies chosen to correspond to each $\Omega_p$ is chosen to be equally spaced the the mel scale. Letting the indexing of the center frequencies of the filters start with $p=1$, we define
 
 \begin{equation}
-mel_p = p\frac{mel_max-mel_min}{N_B+1}+mel_min
+mel_p = p\frac{mel_{max}-mel_{min}}{N_B+1}+mel_{min}
 \end{equation}
 
 where $N_B$ is the number of filters in the filterbank and
 
 \begin{align*}
-mel_min &= 1127.01048*log(1+20/700), \\
-mel_max &= 1127.01048*log(1+0.5*f_s/700),
+mel_{min} &= 1127.01048*log(1+20/700), \\
+mel_{max} &= 1127.01048*log(1+0.5*f_s/700),
 \end{align*}
 
-taking $f_s$ to be the sampling frequency of the audio. This definition gives $mel_max$ to be defined as the highest frequency preserved in the audio file and $mel_min$ to be $20Hz$ (a good baseline for the limit of human hearing).
+taking $f_s$ to be the sampling frequency of the audio. This definition gives $mel_{max}$ to be defined as the highest frequency preserved in the audio file and $mel_{min}$ to be $20Hz$ (a good baseline for the limit of human hearing).
 We then define $H_p$, the hat filter corresponding to each filter to be centered around $\Omega_p$:
 
 \begin{equation} \label{eqn:Hp}
@@ -574,6 +622,10 @@ for f in files:
 
     mel = mfcc(spectroBlack,freqAxis,1,fs,40)
 
+    # Generate frequencies axis labels
+    tick = np.arange(0,len(freqAxis),25)
+    label = np.around(tick*fs/512)
+
     # save figures
     plt.figure(figsize=(8,4),dpi=170)
     plt.imshow(spectroHann, cmap='inferno')
@@ -581,7 +633,8 @@ for f in files:
     plt.colorbar(shrink=0.5).set_label('Magnitude (dB)')
     plt.title('Hann Window Spectrogram: '+filename)
     plt.xlabel('FFT Frame')
-    plt.ylabel('Frequency (bins)')
+    plt.ylabel('Frequency (Hz)')
+    plt.yticks(tick,label)
     plt.savefig('figs/powerHann_'+filename)
     plt.close()
 
@@ -591,7 +644,8 @@ for f in files:
     plt.colorbar(shrink=0.5).set_label('Magnitude (dB)')
     plt.title('Blackman Window Spectrogram: '+filename)
     plt.xlabel('FFT Frame')
-    plt.ylabel('Frequency (bins)')
+    plt.ylabel('Frequency (Hz)')
+    plt.yticks(tick,label)
     plt.savefig('figs/powerBlack_'+filename)
     plt.close()
 
@@ -888,8 +942,11 @@ def mfcc(SP,f,n,fs,nBanks):
     h = np.zeros([nBanks,frange])
     plt.figure(figsize=(8,4),dpi=170)
     plt.ylabel('Magnitude')
-    plt.xlabel('Frequency (dB)')
+    plt.xlabel('Frequency (Hz)')
     plt.title('Mel Filter Banks')
+    tick = np.arange(0,len(f),25)
+    label = np.around(tick*fs/512)
+    plt.xticks(tick,label)
     for p in range(nBanks):
         omegaC = omega[p]
         omegaL = omega[p-1]
@@ -907,6 +964,17 @@ def mfcc(SP,f,n,fs,nBanks):
     #mfcc[p-1,:] = np.sum((np.abs(h*SP[:,n]))**2)
     return mfcc,h
 		\end{lstlisting}
+		
+\pagebreak
+
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{1}
+\bibitem{convolution}
+“Signals \& Systems.” Signals \& Systems, by Alan V. Oppenheim et al., The McGraw-Hill, 1997, p. 78.
+%\bibitem{gibbs} 
+%“Signals \& Systems.” Signals \& Systems, by Alan V. Oppenheim et al., The McGraw-Hill, 1997, pp. 218–219.
+
+\end{thebibliography}
 
 \end{document}
 
