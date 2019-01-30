@@ -1,0 +1,43 @@
+\contentsline {section}{Introduction}{3}% 
+\contentsline {subsection}{Format}{3}% 
+\contentsline {subsection}{\numberline {0.1}Background}{3}% 
+\contentsline {section}{\numberline {1}Time-domain Analysis}{3}% 
+\contentsline {subsection}{\numberline {1.1}Loudness}{3}% 
+\contentsline {paragraph}{}{3}% 
+\contentsline {paragraph}{Results}{3}% 
+\contentsline {subsection}{\numberline {1.2}Zero Crossing Rate}{7}% 
+\contentsline {paragraph}{Results}{7}% 
+\contentsline {paragraph}{Comments}{10}% 
+\contentsline {section}{\numberline {2}Spectral (Frequency) Analysis}{11}% 
+\contentsline {paragraph}{Method}{11}% 
+\contentsline {paragraph}{DTFT Window Derivation}{11}% 
+\contentsline {paragraph}{Windowing a Signal}{12}% 
+\contentsline {subsection}{\numberline {2.1}Spectrogram}{13}% 
+\contentsline {paragraph}{Comments}{15}% 
+\contentsline {subsection}{\numberline {2.2}Spectral Centroid and Spread}{16}% 
+\contentsline {paragraph}{Comments}{20}% 
+\contentsline {subsection}{\numberline {2.3}Spectral Flatness}{20}% 
+\contentsline {paragraph}{Method}{20}% 
+\contentsline {paragraph}{Comments}{22}% 
+\contentsline {subsection}{\numberline {2.4}Spectral Flux}{22}% 
+\contentsline {paragraph}{Comments}{24}% 
+\contentsline {section}{\numberline {3}Psychoacoustics}{24}% 
+\contentsline {paragraph}{Background}{24}% 
+\contentsline {subsection}{\numberline {3.1}The mel/Bark Scale}{24}% 
+\contentsline {subsection}{\numberline {3.2}The Cochlear Filterbank}{24}% 
+\contentsline {paragraph}{Comments}{25}% 
+\contentsline {section}{\numberline {4}Conclusion}{26}% 
+\contentsline {section}{\numberline {5}Appendix}{27}% 
+\contentsline {subsection}{\numberline {5.1}Appendix A: Main}{27}% 
+\contentsline {subsection}{\numberline {5.2}Appendix B: Sample Extraction}{29}% 
+\contentsline {subsection}{\numberline {5.3}Appendix C: Time-domain Analysis}{29}% 
+\contentsline {subsubsection}{\numberline {5.3.1}Loudness}{29}% 
+\contentsline {subsubsection}{\numberline {5.3.2}ZCR}{29}% 
+\contentsline {subsection}{\numberline {5.4}Appendix D: Frequency-domain Analysis}{30}% 
+\contentsline {subsubsection}{\numberline {5.4.1}Spectrogram}{30}% 
+\contentsline {subsubsection}{\numberline {5.4.2}Spectral Centroid and Spread}{31}% 
+\contentsline {subsubsection}{\numberline {5.4.3}Spectral Flatness}{32}% 
+\contentsline {subsubsection}{\numberline {5.4.4}Spectral Flux}{32}% 
+\contentsline {subsection}{\numberline {5.5}Psychoacoustics}{33}% 
+\contentsline {subsubsection}{\numberline {5.5.1}Mel Filter Banks and Coefficients}{33}% 
+\contentsline {section}{References}{34}% 
