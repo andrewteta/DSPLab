@@ -1,12 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 30 15:05:15 2019
+
+@author: Andrew Teta
+"""
+
 import numpy as np
+import matplotlib.pyplot as plt
 from PIL import Image
+import glob,os
+from collections import Counter
 
 def grayscale(image):
-    imageIn = np.asarray(pil_imageIn,np.uint8)
+    imageIn = np.asarray(image,np.uint8)
     rows = imageIn.shape[0]
     cols = imageIn.shape[1]
 
-    # convert image to greyscale
+    # convert image to grayscale
     Y = [0.299,0.587,0.114]
     imGray = np.dot(imageIn,Y)
     imGray = imGray.astype(np.uint8)
@@ -23,9 +33,45 @@ def grayscale(image):
 
     return imGray
 
-pil_imageIn = Image.open('images/test01.jpg')
+def histEQ(image):
+    hist = np.zeros(256,dtype=int)
+    freq = Counter(np.reshape(image,image.shape[0]*image.shape[1]))
+    for p in range(256):
+        hist[p] = freq[p]
+    #plt.figure(dpi=170)
+    #plt.plot(hist)
+    #plt.title('Histogram of Intensities')
+    #plt.ylabel('Number of pixels')
+    #plt.xlabel('Intensity')
+    remap = np.zeros(256,dtype=int)
+    histSum = sum(hist[1:254])
+    P = histSum/254
+    T = P
+    outval = 1
+    curr_sum = 0
+    for inval in range(1,255,1):
+        for c in range(hist[inval]):
+            curr_sum += 1
+            remap[inval] = outval
+            if (c > T):
+                outval = round(curr_sum/P)
+                T = outval*P
+                break
+    return remap
 
-gray1 = grayscale(pil_imageIn)
-
-# Output image to file
-Image.fromarray(gray1).save('figs/test01_out.jpg')
+im = Image.open('images/test01.jpg')
+# convert image to grayscale
+gray1 = grayscale(im)
+im = Image.open('images/test02.jpg')
+# convert image to grayscale
+gray1 = grayscale(im)
+# Output grayscale image to file
+#Image.fromarray(gray1).save('figs/test01_out.jpg')
+im = Image.open('images/lc1.jpg')
+im = im.convert('L')
+im = np.asarray(im,np.float)
+histogram = histEQ(im)
+im = Image.open('images/lc2.jpg')
+im = im.convert('L')
+im = np.asarray(im,np.float)
+histogram = histEQ(im)
