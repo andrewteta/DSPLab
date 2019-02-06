@@ -8,7 +8,8 @@ Created on Wed Jan 30 15:05:15 2019
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import glob,os
+import glob
+import os
 from collections import Counter
 
 def grayscale(image):
@@ -22,7 +23,7 @@ def grayscale(image):
     imGray = imGray.astype(np.uint8)
 
     # convert ndarray into linear array
-    linIm = np.reshape(imGray,rows*cols)
+    linIm = np.reshape(imGray,rows * cols)
 
     # clip out of bounds values
     linIm = np.where(linIm < 0,0,linIm)
@@ -35,7 +36,7 @@ def grayscale(image):
 
 def histEQ(image):
     hist = np.zeros(256,dtype=int)
-    freq = Counter(np.reshape(image,image.shape[0]*image.shape[1]))
+    freq = Counter(np.reshape(image,image.shape[0] * image.shape[1]))
     for p in range(256):
         hist[p] = freq[p]
     #plt.figure(dpi=170)
@@ -44,19 +45,20 @@ def histEQ(image):
     #plt.ylabel('Number of pixels')
     #plt.xlabel('Intensity')
     remap = np.zeros(256,dtype=int)
-    histSum = sum(hist[1:254])
-    P = histSum/254
+    remap[-1] = 255
+    histSum = sum(hist[1:-2])
+    P = histSum / 254
     T = P
     outval = 1
     curr_sum = 0
     for inval in range(1,255,1):
-        for c in range(hist[inval]):
-            curr_sum += 1
-            remap[inval] = outval
-            if (c > T):
-                outval = round(curr_sum/P)
-                T = outval*P
-                break
+        curr_sum += hist[inval]
+        remap[inval] = outval
+        if (curr_sum > T):
+            outval = round(curr_sum/P)
+            T = outval*P
+    for intensity in range(256):
+        imEQ = np.where(image == intensity, remap[intensity])
     return remap
 
 im = Image.open('images/test01.jpg')
@@ -70,7 +72,7 @@ gray1 = grayscale(im)
 im = Image.open('images/lc1.jpg')
 im = im.convert('L')
 im = np.asarray(im,np.float)
-histogram = histEQ(im)
+im_equalized = histEQ(im)
 im = Image.open('images/lc2.jpg')
 im = im.convert('L')
 im = np.asarray(im,np.float)
