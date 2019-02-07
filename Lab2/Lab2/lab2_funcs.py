@@ -88,7 +88,7 @@ def scaleDown(imageIn, N):
     # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, smaller image
-    imageOut = np.zeros([(int)(np.shape(imageIn)[0]/N), (int)(np.shape(imageIn)[1]/N)])
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] / N), (int)(np.shape(imageIn)[1] / N)])
     xIndex = 0
     yIndex = 0
     # loop over x dim
@@ -100,8 +100,16 @@ def scaleDown(imageIn, N):
             yIndex += 1
         yIndex = 0
         xIndex += 1
-    #for block in range(N):
-    #    sample = imageIn[block*N,block*N]
-    #    sample = imageIn[block*blockSizeX:blockSizeX + block*blockSizeX, block*blockSizeY:blockSizeY + block*blockSizeY]
-    #    value = np.average(sample)
-    return image
+    return imageOut
+
+def upScale(imageIn, N):
+    # convert to grayscale
+    imageIn = np.asarray(imageIn.convert('L'), np.float)
+    # declare new, larger image
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), (int)(np.shape(imageIn)[1] * N)])
+    # loop over x dim
+    for pixelX in range(np.shape(imageIn)[0]):
+        # loop over y dim
+        for pixelY in range(np.shape(imageIn)[1]):
+            break
+    return imageOut
