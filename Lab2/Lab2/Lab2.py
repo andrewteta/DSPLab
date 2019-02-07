@@ -26,6 +26,7 @@ import lab2_funcs as lf
 #contrast_enhanced_lc2, orig_hist_lc2, post_hist_lc2 = lf.histEQ(im)
 
 im = Image.open('images/test01.jpg')
-edges = lf.edgeDetect(im)
+edges = lf.Sobel(im, 80)
+Image.fromarray(edges).show()
 
 print ('done')

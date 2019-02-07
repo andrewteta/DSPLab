@@ -1,6 +1,7 @@
 import numpy as np
 from collections import Counter
-from scipy import ndimage
+from scipy import signal
+from PIL import Image
 
 def grayscale(image):
     imageIn = np.asarray(image,np.uint8)
@@ -63,12 +64,21 @@ def histEQ(image):
         hist_after[p] = freq[p]
     return image_equalized, hist_before, hist_after
 
-def edgeDetect(imageIn):
-    df_dy = np.array([-1, -2, -2],
-                     [0, 0, 0]
-                     [1, 2, 1])
-    df_dx = np.array([-1, 0, 1]
-                     [-2, 0, 2]
-                     [-1, 0, 1])
+def Sobel(imageIn, thresh):
+    imageIn = np.asarray(imageIn.convert('L'), np.float)
+    convolved = np.zeros_like(imageIn)
+    df_dy = np.array([[-1, -2, -2],
+                     [0, 0, 0],
+                     [1, 2, 1]])
+    df_dx = np.array([[-1, 0, 1],
+                     [-2, 0, 2],
+                     [-1, 0, 1]])
     # perform convolution
-    return imageIn
+    #for row in range(1, np.shape(imageIn)[0] - 1):
+    #    conv_x = np.convolve
+    convX = signal.fftconvolve(imageIn, df_dx, mode='same')
+    convY = signal.fftconvolve(imageIn, df_dy, mode='same')
+    gradient = np.sqrt( (convX**2) + (convY**2) )
+    gradient = (gradient/np.amax(gradient)) * 255
+    imageOut = np.where(gradient < thresh, 0, 255)
+    return imageOut
