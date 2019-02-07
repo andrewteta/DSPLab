@@ -12,6 +12,7 @@ import os
 from collections import Counter
 import lab2_funcs as lf
 
+# ========== Grayscale Conversion =========== #
 #im = Image.open('images/test01.jpg')
 ## convert image to grayscale
 #gray1 = lf.grayscale(im)
@@ -25,8 +26,13 @@ import lab2_funcs as lf
 #im = Image.open('images/lc2.jpg')
 #contrast_enhanced_lc2, orig_hist_lc2, post_hist_lc2 = lf.histEQ(im)
 
+# ========== Sobel Edge Detection =========== #
+#im = Image.open('images/test01.jpg')
+#edges = lf.Sobel(im, 80)
+#Image.fromarray(edges).show()
+
+# ========== Scale Down =========== #
 im = Image.open('images/test01.jpg')
-edges = lf.Sobel(im, 80)
-Image.fromarray(edges).show()
+smallImage = lf.scaleDown(im, 4)
 
 print ('done')

@@ -65,8 +65,10 @@ def histEQ(image):
     return image_equalized, hist_before, hist_after
 
 def Sobel(imageIn, thresh):
+    # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     convolved = np.zeros_like(imageIn)
+    # Sobel kernels
     df_dy = np.array([[-1, -2, -2],
                      [0, 0, 0],
                      [1, 2, 1]])
@@ -74,11 +76,32 @@ def Sobel(imageIn, thresh):
                      [-2, 0, 2],
                      [-1, 0, 1]])
     # perform convolution
-    #for row in range(1, np.shape(imageIn)[0] - 1):
-    #    conv_x = np.convolve
     convX = signal.fftconvolve(imageIn, df_dx, mode='same')
     convY = signal.fftconvolve(imageIn, df_dy, mode='same')
     gradient = np.sqrt( (convX**2) + (convY**2) )
     gradient = (gradient/np.amax(gradient)) * 255
+    # detect edges based on threshold value
     imageOut = np.where(gradient < thresh, 0, 255)
     return imageOut
+
+def scaleDown(imageIn, N):
+    # convert to grayscale
+    imageIn = np.asarray(imageIn.convert('L'), np.float)
+    # declare new, smaller image
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0]/N), (int)(np.shape(imageIn)[1]/N)])
+    xIndex = 0
+    yIndex = 0
+    # loop over x dim
+    for blockX in range(0, np.shape(imageIn)[0], N):
+        # loop over y dim
+        for blockY in range(0, np.shape(imageIn)[1], N):
+            sample = imageIn[blockX:blockX + N, blockY:blockY + N]
+            imageOut[xIndex,yIndex] = np.average(sample)
+            yIndex += 1
+        yIndex = 0
+        xIndex += 1
+    #for block in range(N):
+    #    sample = imageIn[block*N,block*N]
+    #    sample = imageIn[block*blockSizeX:blockSizeX + block*blockSizeX, block*blockSizeY:blockSizeY + block*blockSizeY]
+    #    value = np.average(sample)
+    return image
