@@ -6,6 +6,7 @@ Created on Wed Jan 30 15:05:15 2019
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 import glob
 import os
@@ -31,14 +32,14 @@ import lab2_funcs as lf
 #edges = lf.Sobel(im, 80)
 #Image.fromarray(edges).show()
 
-# ========== Scale Down =========== #
-#im = Image.open('images/test01.jpg')
-#smallImage = lf.scaleDown(im, 4)
-#Image.fromarray(smallImage).show()
-
-# ========== Scale Up =========== #
+# ========== Scale down by 2, then up by 2 and take the difference =========== #
 im = Image.open('images/test01.jpg')
-bigImage = lf.upScale(im, 2)
-Image.fromarray(bigImage).show()
+smallImage = lf.scaleDown(im, 2)
+Image.fromarray(smallImage.astype(np.uint8)).save('figs/test01_down2.jpg')
+downUp = lf.upScale(Image.open('figs/test01_down2.jpg'), 2)
+Image.fromarray(downUp.astype(np.uint8)).save('figs/test01_down2_up2.jpg')
+diff1 = lf.difference(smallImage, downUp)
+Image.fromarray(diff1).show()
+Image.fromarray(diff1.astype(np.uint8)).save('figs/test01_downUp2_diff.jpg')
 
 print ('done')

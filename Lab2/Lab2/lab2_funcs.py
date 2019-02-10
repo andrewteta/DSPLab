@@ -128,5 +128,10 @@ def upScale(imageIn, N):
             y1 = np.linspace(pixelY, pixelY + 1, N + 1)
             ivals = interp_spline(y1, x1)
             # spread pixels out and place interpolated values in between
-            imageOut[pixelX*N:(pixelX*N) + (N+1), pixelY*N:(pixelY*N) + (N+1)] = ivals
+            imageOut[pixelX*N:(pixelX*N) + (N), pixelY*N:(pixelY*N) + (N)] = ivals[0:N,0:N]
     return imageOut
+
+def difference(im1, im2):
+    diff = 10*np.abs(im1 - im2)
+    np.where(diff > 255, 255, diff)
+    return diff
