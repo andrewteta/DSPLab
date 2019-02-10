@@ -32,13 +32,13 @@ import lab2_funcs as lf
 #Image.fromarray(edges).show()
 
 # ========== Scale Down =========== #
-im = Image.open('images/test01.jpg')
-smallImage = lf.scaleDown(im, 4)
-Image.fromarray(smallImage).show()
+#im = Image.open('images/test01.jpg')
+#smallImage = lf.scaleDown(im, 4)
+#Image.fromarray(smallImage).show()
 
 # ========== Scale Up =========== #
 im = Image.open('images/test01.jpg')
-smallImage = lf.upScale(im, 2)
-Image.fromarray(smallImage).show()
+bigImage = lf.upScale(im, 2)
+Image.fromarray(bigImage).show()
 
 print ('done')

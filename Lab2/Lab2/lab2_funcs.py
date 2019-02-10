@@ -1,6 +1,7 @@
 import numpy as np
 from collections import Counter
 from scipy import signal
+from scipy.interpolate import RectBivariateSpline as sp
 from PIL import Image
 
 def grayscale(image):
@@ -107,9 +108,25 @@ def upScale(imageIn, N):
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, larger image
     imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), (int)(np.shape(imageIn)[1] * N)])
-    # loop over x dim
-    for pixelX in range(np.shape(imageIn)[0]):
-        # loop over y dim
-        for pixelY in range(np.shape(imageIn)[1]):
-            break
+    xIndex = 0
+    yIndex = 0
+    # loop over every x pixel in input image
+    for pixelX in range(np.shape(imageIn)[0] - 1):
+        # loop over every y pixel in input image
+        for pixelY in range(np.shape(imageIn)[1] - 1):
+            # bi-linear interpolation
+            # x and y hold indices of pixels used for interpolation
+            x = np.asarray([pixelX,pixelX + 1], np.int)
+            y = np.asarray([pixelY,pixelY + 1], np.int)
+            # z holds intensities at those locations
+            z = np.asarray([[imageIn[pixelX,pixelY],imageIn[pixelX,pixelY + 1]],
+                            [imageIn[pixelX + 1,pixelY],imageIn[pixelX + 1,pixelY + 1]]], np.float)
+            # interpolation object
+            interp_spline = sp(y, x, z, kx=1, ky=1)
+            # interpolate onto smaller grid
+            x1 = np.linspace(pixelX, pixelX + 1, N + 1)
+            y1 = np.linspace(pixelY, pixelY + 1, N + 1)
+            ivals = interp_spline(y1, x1)
+            # spread pixels out and place interpolated values in between
+            imageOut[pixelX*N:(pixelX*N) + (N+1), pixelY*N:(pixelY*N) + (N+1)] = ivals
     return imageOut
