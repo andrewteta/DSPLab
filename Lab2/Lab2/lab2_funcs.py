@@ -28,17 +28,12 @@ def grayscale(image):
 
 def histEQ(image):
     image = image.convert('L')
-    image = np.asarray(image,np.float)
-    hist_before = np.zeros(256,dtype=int)
-    freq = Counter(np.reshape(image,image.shape[0] * image.shape[1]))
+    image = np.asarray(image, np.float)
+    hist_before = np.zeros(256, dtype=int)
+    freq = Counter(np.reshape(image, image.shape[0] * image.shape[1]))
     for p in range(256):
         hist_before[p] = freq[p]
-    #plt.figure(dpi=170)
-    #plt.plot(hist)
-    #plt.title('Histogram of Intensities')
-    #plt.ylabel('Number of pixels')
-    #plt.xlabel('Intensity')
-    remap = np.zeros(256,dtype=int)
+    remap = np.zeros(256, dtype=int)
     remap[-1] = 255
     histSum = sum(hist_before[1:-2])
     P = histSum / 254
@@ -46,7 +41,7 @@ def histEQ(image):
     outval = 1
     curr_sum = 0
     # build remap table
-    for inval in range(1,255,1):
+    for inval in range(1, 255, 1):
         curr_sum += hist_before[inval]
         remap[inval] = outval
         if (curr_sum > T):
@@ -63,7 +58,7 @@ def histEQ(image):
     freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] * image_equalized.shape[1]))
     for p in range(256):
         hist_after[p] = freq[p]
-    return image_equalized, hist_before, hist_after
+    return image_equalized, hist_before, hist_after, remap, image
 
 def Sobel(imageIn, thresh):
     # convert to grayscale
