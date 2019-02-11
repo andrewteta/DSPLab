@@ -14,16 +14,16 @@ from collections import Counter
 import lab2_funcs as lf
 
 # ========== Grayscale Conversion =========== #
-#im1 = Image.open('images/test01.jpg')
-## convert image to grayscale
-#gray1 = lf.grayscale(im1)
-## Output grayscale image to file
-#Image.fromarray(gray1.astype(np.uint8)).save('figs/test01_gray.jpg')
-#im2 = Image.open('images/test02.jpg')
-## convert image to grayscale
-#gray2 = lf.grayscale(im2)
-## Output grayscale image to file
-#Image.fromarray(gray2.astype(np.uint8)).save('figs/test02_gray.jpg')
+im1 = Image.open('images/test01.jpg')
+# convert image to grayscale
+gray1 = lf.grayscale(im1)
+# Output grayscale image to file
+Image.fromarray(gray1.astype(np.uint8)).save('figs/test01_gray.jpg')
+im2 = Image.open('images/test02.jpg')
+# convert image to grayscale
+gray2 = lf.grayscale(im2)
+# Output grayscale image to file
+Image.fromarray(gray2.astype(np.uint8)).save('figs/test02_gray.jpg')
 
 # ========== Histogram Equalization =========== #
 # lc1
@@ -73,29 +73,49 @@ plt.ylabel('Input')
 plt.xlabel('Output')
 plt.savefig('figs/lc2_remap')
 
+# moon
+im = Image.open('images/lc3.jpg')
+contrast_enhanced_lc3, orig_hist_lc3, post_hist_lc3, remap3, im_out3 = lf.histEQ(im)
+Image.fromarray(im_out3.astype(np.uint8)).save('figs/lc3_gray.jpg')
+Image.fromarray(contrast_enhanced_lc3.astype(np.uint8)).save('figs/lc3_ce.jpg')
+
+# succulents
+im = Image.open('images/succs.jpg')
+ce_succs, or_succs, po_succs, rm_succs, out_succs = lf.histEQ(im)
+Image.fromarray(out_succs.astype(np.uint8)).save('figs/succs_gray.jpg')
+Image.fromarray(ce_succs.astype(np.uint8)).save('figs/succs_ce.jpg')
+
 # ========== Sobel Edge Detection =========== #
-#im = Image.open('images/test01.jpg')
-#edges = lf.Sobel(im, 80)
-#Image.fromarray(edges).show()
+# CU
+im = Image.open('images/test01.jpg')
+for n in range(10, 250, 10):
+    edges1 = lf.Sobel(im, n)
+    Image.fromarray(edges1.astype(np.uint8)).save('figs/test01_edges' + str(n) + '.jpg')
+
+# bear
+im = Image.open('images/test02.jpg')
+for n in range(10, 250, 10):
+    edges2 = lf.Sobel(im, n)
+    Image.fromarray(edges2.astype(np.uint8)).save('figs/test02_edges' + str(n) + '.jpg')
 
 # ========== Scale down by 2, then up by 2 and take the difference =========== #
-#im = Image.open('images/test01.jpg')
-#smallImage = lf.scaleDown(im, 2)
-#Image.fromarray(smallImage.astype(np.uint8)).save('figs/test01_down2.jpg')
-#downUp = lf.upScale(Image.open('figs/test01_down2.jpg'), 2)
-#Image.fromarray(downUp.astype(np.uint8)).save('figs/test01_down2_up2.jpg')
-#diff1 = lf.difference(lf.grayscale(im), downUp)
-#Image.fromarray(diff1).show()
-#Image.fromarray(diff1.astype(np.uint8)).save('figs/test01_downUp2_diff.jpg')
+im = Image.open('images/test01.jpg')
+smallImage = lf.scaleDown(im, 2)
+Image.fromarray(smallImage.astype(np.uint8)).save('figs/test01_down2.jpg')
+downUp = lf.upScale(Image.open('figs/test01_down2.jpg'), 2)
+Image.fromarray(downUp.astype(np.uint8)).save('figs/test01_down2_up2.jpg')
+diff1 = lf.difference(lf.grayscale(im), downUp)
+Image.fromarray(diff1).show()
+Image.fromarray(diff1.astype(np.uint8)).save('figs/test01_downUp2_diff2.jpg')
 
 # ========== Scale down by 4, then up by 4 and take the difference =========== #
-#im = Image.open('images/test01.jpg')
-#smallImage1 = lf.scaleDown(im, 4)
-#Image.fromarray(smallImage1.astype(np.uint8)).save('figs/test01_down4.jpg')
-#downUp1 = lf.upScale(Image.open('figs/test01_down4.jpg'), 4)
-#Image.fromarray(downUp1.astype(np.uint8)).save('figs/test01_down4_up4.jpg')
-#diff2 = lf.difference(lf.grayscale(im), downUp1)
-#Image.fromarray(diff2).show()
-#Image.fromarray(diff2.astype(np.uint8)).save('figs/test01_downUp4_diff.jpg')
+im = Image.open('images/test01.jpg')
+smallImage1 = lf.scaleDown(im, 4)
+Image.fromarray(smallImage1.astype(np.uint8)).save('figs/test01_down4.jpg')
+downUp1 = lf.upScale(Image.open('figs/test01_down4.jpg'), 4)
+Image.fromarray(downUp1.astype(np.uint8)).save('figs/test01_down4_up4.jpg')
+diff2 = lf.difference(lf.grayscale(im), downUp1)
+Image.fromarray(diff2).show()
+Image.fromarray(diff2.astype(np.uint8)).save('figs/test01_downUp4_diff2.jpg')
 
 print ('done')

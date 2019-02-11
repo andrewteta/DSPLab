@@ -30,9 +30,12 @@ def histEQ(image):
     image = image.convert('L')
     image = np.asarray(image, np.float)
     hist_before = np.zeros(256, dtype=int)
+    # Count frequency of every value in image
     freq = Counter(np.reshape(image, image.shape[0] * image.shape[1]))
+    # sort into numpy array
     for p in range(256):
         hist_before[p] = freq[p]
+    # declare remapping table and initialize variables
     remap = np.zeros(256, dtype=int)
     remap[-1] = 255
     histSum = sum(hist_before[1:-2])
@@ -55,7 +58,9 @@ def histEQ(image):
         image_equalized = np.where(image == intensity, remap[intensity], image_equalized)
     # compute histogram after equalization
     hist_after = np.zeros(256,dtype=int)
+    # count value occurrences
     freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] * image_equalized.shape[1]))
+    # sort
     for p in range(256):
         hist_after[p] = freq[p]
     return image_equalized, hist_before, hist_after, remap, image
@@ -74,7 +79,9 @@ def Sobel(imageIn, thresh):
     # perform convolution
     convX = signal.fftconvolve(imageIn, df_dx, mode='same')
     convY = signal.fftconvolve(imageIn, df_dy, mode='same')
+    # find the magnitude of the gradient for every pixel
     gradient = np.sqrt( (convX**2) + (convY**2) )
+    # normalize
     gradient = (gradient/np.amax(gradient)) * 255
     # detect edges based on threshold value
     imageOut = np.where(gradient < thresh, 0, 255)
@@ -127,6 +134,6 @@ def upScale(imageIn, N):
     return imageOut
 
 def difference(im1, im2):
-    diff = 10*np.abs(im1 - im2)
+    diff = 2*np.abs(im1 - im2)
     np.where(diff > 255, 255, diff)
     return diff

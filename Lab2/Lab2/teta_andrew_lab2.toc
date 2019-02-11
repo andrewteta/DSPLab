@@ -10,6 +10,24 @@
 \contentsline {subsection}{\numberline {3.1}Introduction}{5}% 
 \contentsline {subsection}{\numberline {3.2}Method}{5}% 
 \contentsline {subsection}{\numberline {3.3}Results}{6}% 
-\contentsline {section}{\numberline {4}Appendix}{11}% 
-\contentsline {subsection}{\numberline {4.1}Appendix A: Main}{11}% 
-\contentsline {subsection}{\numberline {4.2}Appendix B: Grayscale Conversion}{11}% 
+\contentsline {section}{\numberline {4}Sobel Edge Detection}{12}% 
+\contentsline {subsection}{\numberline {4.1}Introduction}{12}% 
+\contentsline {subsection}{\numberline {4.2}Method}{12}% 
+\contentsline {subsection}{\numberline {4.3}Results}{12}% 
+\contentsline {section}{\numberline {5}Image Resizing}{15}% 
+\contentsline {subsection}{\numberline {5.1}Introduction}{15}% 
+\contentsline {paragraph}{Downsampling}{15}% 
+\contentsline {paragraph}{Upsampling}{15}% 
+\contentsline {subsection}{\numberline {5.2}Method}{16}% 
+\contentsline {paragraph}{Downsampling}{16}% 
+\contentsline {paragraph}{Upsampling}{16}% 
+\contentsline {subsection}{\numberline {5.3}Results}{17}% 
+\contentsline {section}{\numberline {6}Conclusion}{20}% 
+\contentsline {section}{\numberline {7}Appendix}{21}% 
+\contentsline {subsection}{\numberline {7.1}Appendix A: Grayscale Conversion}{21}% 
+\contentsline {subsection}{\numberline {7.2}Appendix B: Histogram Equalization}{22}% 
+\contentsline {subsection}{\numberline {7.3}Appendix C: Edge Detection}{23}% 
+\contentsline {subsection}{\numberline {7.4}Appendix D: Downsampling}{23}% 
+\contentsline {subsection}{\numberline {7.5}Appendix E: Upsampling}{24}% 
+\contentsline {subsection}{\numberline {7.6}Appendix F: Difference}{24}% 
+\contentsline {subsection}{\numberline {7.7}Appendix G: Main}{25}% 
