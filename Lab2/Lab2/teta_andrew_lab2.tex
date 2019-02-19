@@ -53,6 +53,7 @@
 	\begin{subfigure}[h]{0.6\textwidth}
 		\includegraphics[width=\textwidth]{images/test01}
 	\end{subfigure}
+	\par\bigskip
 	\begin{subfigure}[h]{0.6\textwidth}
 		\includegraphics[width=\textwidth]{figs/test01_gray}
 	\end{subfigure}
@@ -73,7 +74,7 @@ In this discussion, we will be exploring some common manipulations applied to im
 \subsection{Background}
 We will be working with a common uncompressed image format, BMP (short for bitmap). This file type begins with a short header, followed by a 2-dimensional array of pixel information. Color BMP files store three 8-bit numbers for each pixel, corresponding to an R, G, and B intensity value.
 
-\begin{figure}
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{figs/rgb_example}
 	\caption{Example of a 4x4 color BMP image file}
@@ -217,12 +218,12 @@ for inval in range(1, 255, 1):
 	\centering
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_hist_bef}
-		\caption{histogram of low-contrast image}
+		\caption{Histogram of low-contrast image}
 		\label{fig:lc1_hist_before_r}
 	\end{subfigure}
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_remap}
-		\caption{remapping function}
+		\caption{Remapping function}
 		\label{fig:lc1_remap}
 	\end{subfigure}
 	\caption{Histogram and remapping function for a low contrast image.}
@@ -238,6 +239,8 @@ for intensity in range(256):
     image_equalized = np.where(image == intensity, remap[intensity], image_equalized)
 \end{lstlisting}
 
+\pagebreak
+
 \subsection{Results}
 The full results of contrast enhancement for two images can be seen in figures \ref{fig:eq1} and \ref{fig:eq2}.
 
@@ -246,13 +249,13 @@ The full results of contrast enhancement for two images can be seen in figures \
 	\centering
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_gray}
-		\caption{original}
+		\caption{Original}
 		\label{fig:lc1_orig}
 	\end{subfigure}
-	
+	\par\bigskip
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_hist_bef}
-		\caption{before}
+		\caption{Before}
 		\label{fig:hist_bef_1}
 	\end{subfigure}
 	
@@ -267,13 +270,13 @@ The full results of contrast enhancement for two images can be seen in figures \
 	\centering
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_ce}
-		\caption{contrast enhanced}
+		\caption{Contrast enhanced}
 		\label{fig:lc1_after}
 	\end{subfigure}
-	
+	\par\bigskip
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc1_hist_aft}
-		\caption{after}
+		\caption{After}
 		\label{fig:hist_aft_1}
 	\end{subfigure}
 \end{figure}
@@ -287,13 +290,13 @@ Figure \ref{fig:eq1} shows the process of histogram equalization for a picture o
 	\centering
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc2_gray}
-		\caption{original}
+		\caption{Original}
 		\label{fig:lc2_orig}
 	\end{subfigure}
-	
+	\par\bigskip
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc2_hist_bef}
-		\caption{before}
+		\caption{Before}
 		\label{fig:hist_bef_2}
 	\end{subfigure}
 	
@@ -308,13 +311,13 @@ Figure \ref{fig:eq1} shows the process of histogram equalization for a picture o
 	\centering
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc2_ce}
-		\caption{contrast enhanced}
+		\caption{Contrast enhanced}
 		\label{fig:lc2_after}
 	\end{subfigure}
-	
+	\par\bigskip
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc2_hist_aft}
-		\caption{after}
+		\caption{After}
 		\label{fig:hist_aft_2}
 	\end{subfigure}
 \end{figure}
@@ -328,12 +331,12 @@ Despite calling this "equalization", the histograms are not flat. I think this m
 	\centering
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc3_gray}
-		\caption{before}
+		\caption{Before}
 		\label{fig:moon_bef}
 	\end{subfigure}
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/lc3_ce}
-		\caption{after}
+		\caption{After}
 		\label{fig:moon_aft}
 	\end{subfigure}	
 	
@@ -347,12 +350,12 @@ This picture of the moon is arguable low-contrast, but many pictures of the moon
 	\centering
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/succs_gray}
-		\caption{before}
+		\caption{Before}
 		\label{fig:succs_bef}
 	\end{subfigure}
 	\begin{subfigure}[h]{0.45\textwidth}
 		\includegraphics[width=\textwidth]{figs/succs_ce}
-		\caption{after}
+		\caption{After}
 		\label{fig:succs_aft}
 	\end{subfigure}
 	
@@ -413,13 +416,13 @@ The above algorithm (see \ref{app:edge} for the full implementation) was used to
 	\centering
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/test01_gray}
-		\caption{before edge detection}
+		\caption{Before edge detection}
 		\label{fig:test01_gray}
 	\end{subfigure}
-	
+	\par
 	\begin{subfigure}[h]{0.7\textwidth}
 		\includegraphics[width=\textwidth]{figs/test01_edges}
-		\caption{after edge detection}
+		\caption{After edge detection}
 		\label{fig:test01_edge}
 	\end{subfigure}
 	
@@ -435,13 +438,13 @@ This looks pretty good! People walking stand out well from the sidewalk, buildin
 	\centering
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/test02_gray}
-		\caption{before edge detection}
+		\caption{Before edge detection}
 		\label{fig:test02_gray}
 	\end{subfigure}
-	
+	\par
 	\begin{subfigure}[h]{0.75\textwidth}
 		\includegraphics[width=\textwidth]{figs/test02_edges}
-		\caption{after edge detection}
+		\caption{After edge detection}
 		\label{fig:test02_edge}
 	\end{subfigure}
 	
@@ -625,11 +628,14 @@ def histEQ(image):
     # remap intensities into equalized array
     for intensity in range(256):
         # remap values to equalize
-        image_equalized = np.where(image == intensity, remap[intensity], image_equalized)
+        image_equalized = np.where(image == intensity, 
+                                   remap[intensity], 
+                                   image_equalized)
     # compute histogram after equalization
     hist_after = np.zeros(256,dtype=int)
     # count value occurrences
-    freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] * image_equalized.shape[1]))
+    freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] 
+                              * image_equalized.shape[1]))
     # sort
     for p in range(256):
         hist_after[p] = freq[p]
@@ -669,7 +675,8 @@ def scaleDown(imageIn, N):
     # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, smaller image
-    imageOut = np.zeros([(int)(np.shape(imageIn)[0] / N), (int)(np.shape(imageIn)[1] / N)])
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] / N), 
+                         (int)(np.shape(imageIn)[1] / N)])
     xIndex = 0
     yIndex = 0
     # loop over x dim
@@ -692,7 +699,8 @@ def upScale(imageIn, N):
     # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, larger image
-    imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), (int)(np.shape(imageIn)[1] * N)])
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), 
+                         (int)(np.shape(imageIn)[1] * N)])
     xIndex = 0
     yIndex = 0
     # loop over every x pixel in input image
@@ -704,8 +712,10 @@ def upScale(imageIn, N):
             x = np.asarray([pixelX,pixelX + 1], np.int)
             y = np.asarray([pixelY,pixelY + 1], np.int)
             # z holds intensities at those locations
-            z = np.asarray([[imageIn[pixelX,pixelY],imageIn[pixelX,pixelY + 1]],
-                            [imageIn[pixelX + 1,pixelY],imageIn[pixelX + 1,pixelY + 1]]], np.float)
+            z = np.asarray([[imageIn[pixelX,pixelY],
+                             imageIn[pixelX,pixelY + 1]],
+                            [imageIn[pixelX + 1,pixelY],
+                             imageIn[pixelX + 1,pixelY + 1]]], np.float)
             # interpolation object
             interp_spline = sp(y, x, z, kx=1, ky=1)
             # interpolate onto smaller grid

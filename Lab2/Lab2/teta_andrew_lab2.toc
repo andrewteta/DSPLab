@@ -9,7 +9,7 @@
 \contentsline {section}{\numberline {3}Contrast Enhancement}{5}% 
 \contentsline {subsection}{\numberline {3.1}Introduction}{5}% 
 \contentsline {subsection}{\numberline {3.2}Method}{5}% 
-\contentsline {subsection}{\numberline {3.3}Results}{6}% 
+\contentsline {subsection}{\numberline {3.3}Results}{7}% 
 \contentsline {section}{\numberline {4}Sobel Edge Detection}{12}% 
 \contentsline {subsection}{\numberline {4.1}Introduction}{12}% 
 \contentsline {subsection}{\numberline {4.2}Method}{12}% 

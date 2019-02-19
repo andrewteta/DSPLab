@@ -55,11 +55,14 @@ def histEQ(image):
     # remap intensities into equalized array
     for intensity in range(256):
         # remap values to equalize
-        image_equalized = np.where(image == intensity, remap[intensity], image_equalized)
+        image_equalized = np.where(image == intensity, 
+                                   remap[intensity], 
+                                   image_equalized)
     # compute histogram after equalization
     hist_after = np.zeros(256,dtype=int)
     # count value occurrences
-    freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] * image_equalized.shape[1]))
+    freq = Counter(np.reshape(image_equalized,image_equalized.shape[0] 
+                              * image_equalized.shape[1]))
     # sort
     for p in range(256):
         hist_after[p] = freq[p]
@@ -91,7 +94,8 @@ def scaleDown(imageIn, N):
     # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, smaller image
-    imageOut = np.zeros([(int)(np.shape(imageIn)[0] / N), (int)(np.shape(imageIn)[1] / N)])
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] / N), 
+                         (int)(np.shape(imageIn)[1] / N)])
     xIndex = 0
     yIndex = 0
     # loop over x dim
@@ -109,7 +113,8 @@ def upScale(imageIn, N):
     # convert to grayscale
     imageIn = np.asarray(imageIn.convert('L'), np.float)
     # declare new, larger image
-    imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), (int)(np.shape(imageIn)[1] * N)])
+    imageOut = np.zeros([(int)(np.shape(imageIn)[0] * N), 
+                         (int)(np.shape(imageIn)[1] * N)])
     xIndex = 0
     yIndex = 0
     # loop over every x pixel in input image
@@ -121,8 +126,10 @@ def upScale(imageIn, N):
             x = np.asarray([pixelX,pixelX + 1], np.int)
             y = np.asarray([pixelY,pixelY + 1], np.int)
             # z holds intensities at those locations
-            z = np.asarray([[imageIn[pixelX,pixelY],imageIn[pixelX,pixelY + 1]],
-                            [imageIn[pixelX + 1,pixelY],imageIn[pixelX + 1,pixelY + 1]]], np.float)
+            z = np.asarray([[imageIn[pixelX,pixelY],
+                             imageIn[pixelX,pixelY + 1]],
+                            [imageIn[pixelX + 1,pixelY],
+                             imageIn[pixelX + 1,pixelY + 1]]], np.float)
             # interpolation object
             interp_spline = sp(y, x, z, kx=1, ky=1)
             # interpolate onto smaller grid
