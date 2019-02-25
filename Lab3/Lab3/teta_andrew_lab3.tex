@@ -71,12 +71,363 @@
 In this lab, we explore the low-level implementation of perspective distortion correction, and a simplified model of video motion tracking between frames in Python. We will mostly use \verb|numpy| to manipulate N-D arrays of pixel information. Additionally, I used a free photo editing software called GIMP to select pixel indexes.
 
 \subsection{Background}
-Our algorithm for perspective distortion correction relies on the math theory of linear algebra, using a linear transformation matrix to map pixels from one image to another. Then, the process of motion tracking between frames will be based on a series of image pyramids, using block-based motion estimation to "search" for a matching region in the next frame.
+Our algorithm for perspective distortion correction relies on the math theory of linear algebra, using a linear transformation matrix to map pixels from one image to another. The process of motion tracking between frames will be based on a series of image pyramids, using block-based motion estimation to "search" for a matching region in the next frame.
 
 \section{Perspective Distortion Correction}
 \subsection{Linear Regression}
-We begin by defining linear regression as one approach to modeling the relationship between a dependent and independent variable. This method is commonly used to fit a model to an \textbf{over-determined} set of data points. By over-determined, we mean there are more equations defining the data set, than there are variables, often occurring when many measurements are performed to estimate a small number of parameters. 
+We begin by defining linear regression as one approach to modeling the relationship between a set of dependent and independent variables. This method is commonly used to fit a model to an \textbf{over-determined} set of data points. By over-determined, we mean there are more equations defining the data set than there are variables, often occurring when many measurements are performed to estimate a small number of parameters. 
 
-Mathematically, we have a relationship of the form, $Ax=c$, where A is over-determined. This only has a solution if \textbf{c} lies in the column space of A, however there will not be an exact solution if A is over-determined and we instead seek an \textbf{x} that minimizes the mean-squared-error (MSE), defined $E=|A\textbf{x}-\textbf{b}|^2$. Ultimately, we want to find a "pseudo-inverse", $A^+$, such that $\textbf{x}^\$=A^+\textbf{c}$
+Mathematically, we have a relationship of the form, $Ax=c$, where A is over-determined. This only has a solution if \textbf{c} lies in the column space of A, however there will not be an exact solution if A is over-determined and we instead seek an \textbf{x} that minimizes the mean-squared-error (MSE), defined as, $E=|A\textbf{x}-\textbf{b}|^2$. Ultimately, we want to find a "pseudo-inverse", $A^+$, such that $\textbf{x}^\$=A^+\textbf{c}$.
+
+For a given point, $\textbf{c}$, we want to find the closest point in the column space of A. This turns out to be the projection, $\textbf{p}$, of $\textbf{c}$ onto the column space. Thus, the error is the distance vector, $\textbf{c} - \textbf{p}$, orthogonal to the column space. To be orthogonal, the error vector must be orthogonal to every column of A.
+
+\begin{align*}
+(\textbf{c} - \textbf{p})^T A &= \textbf{0} \\
+\textbf{p}^T A &= \textbf{c}^T A \\
+A^T\textbf{p} &= A^T\textbf{c}
+\end{align*}
+
+We are in search of $\textbf{x}^\$$ such that $A\textbf{x}^\$ = \textbf{p}$. Assuming the columns of A are linearly independent and substituting, we obtain
+
+\begin{align*}
+A^T A\textbf{x}^\$ &= A^T\textbf{c} \\
+\textbf{x}^\$ &= (A^T A)^{-1} A^T\textbf{c}
+\end{align*}
+
+Therefore,
+
+\begin{equation} \label{eq:pseudo_inverse}
+A^+ = (A^T A)^{-1} A^T
+\end{equation}
+
+\pagebreak
+
+To demonstrate linear regression, we consider a hypothetical experiment trying to correlate electrode sensor data to a subjective hunger measurement. The data is as follows.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{electrode}
+	\caption{Experimental data}
+	\label{fig:electrode}
+\end{figure}
+
+In Python, $A_p = A^+$ can be written as \verb|A_p = np.linalg.inv(A.T.dot(A)).dot(A.T)| and calculating $\textbf{x}^\$$, \verb|x = A_p.dot(c)|, the prediction coefficients, we have
+
+\begin{equation}
+	x^\$ =
+	\begin{bmatrix}
+		x1 \\
+		x2 \\
+		x3
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		11.93 \\
+		8.02 \\
+		-3.98
+	\end{bmatrix}
+\end{equation}
+
+Calculating the MSE for this prediction vector is simple, and results in
+
+\begin{equation}
+	MSE = 
+	\begin{bmatrix}
+	2.36 \\
+	2.31 \\
+	12.22 \\
+	0.05 \\
+	13.41 \\
+	1.73 \\
+	0.36 \\
+	8.56
+	\end{bmatrix}
+\end{equation}
+
+\pagebreak
+
+\subsection{Perspective Correction}
+We will use the concept of linear regression to correct perspective distortion in an image. Consider the following diagrams representing a simple model for imaging and projection.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{projection}
+	\caption{Simple projection imaging ray diagram.}
+	\label{fig:projection}
+\end{figure}
+
+Analyzing the relationships between points in the ray diagram of fig. \ref{fig:projection}, we see in fig. \ref{fig:proj_relations} there is a simple relationship for points in a projection.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.6\textwidth]{proj_relations}
+	\caption{A projection image and arbitrary object plane of focal distance, f.}
+	\label{fig:proj_relations}
+\end{figure}
+
+Geometrically, we have 
+\begin{align*}
+\frac{f}{X_3} &= \frac{x_1}{X_1} \\
+x_1 &= f\frac{X_1}{X_3} \\
+\text{and by a similar argument,} \\
+x_2 &= f\frac{X_2}{X_3}
+\end{align*}
+
+Therefore, the camera coordinates, $(X_1, X_2, X_3)$ are related to the canonical image coordinates, $(x_1, x_2)$ as
+
+\begin{equation}
+	\begin{bmatrix}
+		x_1 \\
+		x_2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		f & 0 \\
+		0 & f \\
+	\end{bmatrix}
+	\begin{bmatrix}
+		X_1 \\
+		X_2
+	\end{bmatrix}
+	\frac{1}{X_3}
+\end{equation}
+
+However, this relationship is non-linear and we can do this another way. By finding a relationship in \textit{homogeneous} coordinates, we arrive at a linear relationship
+
+\begin{equation}
+	\vec{x} = 
+	\begin{bmatrix}
+		x_1 \\
+		x_2 \\
+		x_3
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		f & 0 & 0 & 0 \\
+		0 & f & 0 & 0 \\
+		0 & 0 & 1 & 0 
+	\end{bmatrix}
+	\begin{bmatrix}
+		X_1 \\
+		X_2 \\
+		X_3 \\
+		1
+	\end{bmatrix}
+\end{equation}
+
+where the canonical coordinates of the projection point, $\vec{x}$ are found as $x_1/x_3$ and $x_2/x_3$.
+
+Thus, while in Euclidean geometry, a point in N-D space is described by an N-D vector, in projective geometry, a point in N-D space is described by an (N+1)-D vector. The last coordinate, $k$ is a multiplier of the first N coordinates. Then, a point can be scaled by $k$ as $(k*rows, k*cols, k)$, a homogeneous vector.
+
+\paragraph{Fact:} Given a set of world points known to lie on a plane, there exists a matrix, $H$, that maps the $(row, col)$ image points in one camera to the the $(row, col)$ image points in another camera. Mathematically,
+
+\begin{equation} \label{eq:hmap}
+\vec{v} = H\vec{x}.
+\end{equation}
+
+For our purpose of correcting perspective distortion, we take $\vec{x}$ to be a homogeneous vector of a point in the distorted image, $\vec{v}$ to be a homogeneous vector of the same point in the corrected image, and seek a matrix $H$ that maps lines converging at infinity to parallel lines in the Euclidean plane. 
+
+The process of perspective distortion correction will consist of choosing a set of points in a distorted image that lie on a plane, although not all on the same line. We will choose 20 points and two lines (10 points per line). Then, we will define 20 points, again in two lines, of which to map each pixel index. 
+
+\pagebreak
+
+\paragraph{Procedure} Using GIMP and the mouse cursor, I selected 10 points on successive corners of the upper windows in the image shown in fig. \ref{fig:distorted} and 10 more points on the lower windows. Then choosing a relatively arbitrary range of values along the \textit{col} dimension, and two constant values of \textit{row}, I generated a set of 20 points in the horizontal direction, of which to map the original points into a corrected image. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{PC_test_2}
+	\caption{Distorted image to be corrected.}
+	\label{fig:distorted}
+\end{figure}
+
+Thus, the mapping for the first line is
+
+\begin{equation}
+	\begin{bmatrix}
+		750 & 215 \\
+		675 & 235 \\
+		625 & 250 \\
+		575 & 265 \\
+		535 & 275 \\
+		500 & 285 \\
+		475 & 295 \\
+		445 & 300 \\
+		425 & 305 \\
+		405 & 315
+	\end{bmatrix}
+	\longrightarrow
+	\begin{bmatrix}
+		750 & 305 \\
+		711.67 & 305 \\
+		673.33 & 305 \\
+		635 & 305 \\
+		596.67 & 305 \\
+		558.33 & 305 \\
+		520 & 305 \\
+		481.67 & 305 \\
+		443.33 & 305 \\
+		405 & 305
+	\end{bmatrix}
+\end{equation}
+
+and for the second line,
+
+\begin{equation}
+	\begin{bmatrix}
+		745 & 575 \\
+		670 & 555 \\
+		615 & 540 \\
+		565 & 525 \\
+		530 & 515 \\
+		495 & 505 \\
+		468 & 500 \\
+		440 & 495 \\
+		420 & 488 \\
+		400 & 483
+	\end{bmatrix}
+	\longrightarrow
+	\begin{bmatrix}
+		750 & 475 \\
+		711.67 & 475 \\
+		673.33 & 475 \\
+		635 & 475 \\
+		596.67 & 475 \\
+		558.33 & 475 \\
+		520 & 475 \\
+		481.67 & 475 \\
+		443.33 & 475 \\
+		405 & 475
+	\end{bmatrix}
+\end{equation}
+
+Considering a point in the distorted image to be $(c,d)$ and a point in the corrected image, $(a,b)$, the above relation can be expressed
+
+\begin{align*}
+	(c_1,d_1) &= (a_1,b_1) \\
+	(c_2,d_2) &= (a_2,b_2) \\
+	\ldots \\
+	(c_{20},d_{20}) &= (a_{20},b_{20})
+\end{align*}
+
+Now, the relationship we need to find is
+
+\begin{equation} \label{eq:H}
+	\begin{bmatrix}
+		v_1 \\
+		v_2 \\
+		v_3
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		h_11 & h_12 & h_13 \\
+		h_21 & h_22 & h_23 \\
+		h_31 & h_32 & 1
+	\end{bmatrix}
+	\begin{bmatrix}
+		c \\
+		d \\
+		1
+	\end{bmatrix} 
+	\text{and}
+	\begin{bmatrix}
+		a \\
+		b
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		v_1/v_3 \\
+		v_2/v_3
+	\end{bmatrix}
+\end{equation}
+
+Solving for $v_1/v_3$ and $v_2/v_3$ in \ref{eq:H}, we find
+
+\begin{align*}
+a &= \frac{h_{11} c + h_{12} d + h_{13}}{h_{31} c + h_{32} d + 1} \\
+b &= \frac{h_{21} c + h_{22} d + h_{23}}{h_{31} c + h_{32} d + 1}
+\end{align*}
+
+which can also be written in matrix form as 
+
+\begin{equation} \label{eq:mapping}
+	\begin{bmatrix}
+		c & d & 1 & 0 & 0 & 0 & -ac & -ad \\
+		0 & 0 & 0 & c & d & 1 & -bc & -bd
+	\end{bmatrix}
+	\begin{bmatrix}
+		h_{11} \\
+		h_{12} \\
+		h_{13} \\
+		h_{21} \\
+		h_{22} \\
+		h_{23} \\
+		h_{31} \\
+		h_{32}
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		a \\
+		b
+	\end{bmatrix}
+\end{equation}
+
+\pagebreak
+
+The Python procedure for this process goes as follows. First, we define a list of pixel coordinate points in the distorted image, \verb|inputPoints| and the points to map into, \verb|outputPoints|. Then, we build the left-hand side of \eqref{eq:mapping}, constructing a [40, 8] matrix, \verb|mapping| (two rows for each point). Using the same method as we did in the linear regression problem, we find the pseudo inverse, \verb|mapping_inv = np.linalg.inv(mapping.T.dot(mapping)).dot(mapping.T)|. Reshaping the set of output points into a [40, 1] vector allows us to calculate $H = mapping_{inv} \cdot outputPoints$ ([9, 1]). We then append $1$ to the end, and reshape into a [3, 3] matrix.
+
+At this point, we are ready to remap every pixel in the distorted image to generate a corrected image. We initialize a new \verb|numpy| array to be the same dimensions as the distorted image and begin stepping over each pixel. The method, now, is to compute $\vec{v} = H^{-1} \cdot \vec{p}$, where $\vec{p}$ is the pixel index of the corrected image, and $[a,b] = [v_1/v_3, v_2/v_3]$
+
+We then check to verify that $[a,b]$ is within the bounds of the distorted image dimensions and perform a bilinear interpolation to find the RGB intensity value for the current pixel in the corrected image.
+
+\pagebreak
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}[h]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{PC_test_2}
+		\caption{Original "distorted" image.}
+		\label{fig:original}
+	\end{subfigure}
+	\par\medskip
+	\begin{subfigure}[h]{0.8\textwidth}
+		\includegraphics[width=\textwidth]{out1}
+		\caption{Corrected image.}
+		\label{fig:corrected}
+	\end{subfigure}
+	\caption{Perspective distortion correction.}
+	\label{fig:correction}
+\end{figure}
+
+\clearpage
+
+Notice how the image gets increasingly blurry toward the left-hand side. This is due to the interpolation in this region. The mapping we attempted, tried to squeeze the right-hand side down, while stretching the left-hand side up. The mapping function also sets pixels to black if they are out of range of the original image, so there are large black triangles, where the perspective correction had no data to interpolate from for those regions. It may look better if the image was cropped, or a different set of output points was chosen. Unfortunately, this method also does not accommodate points that do not lie in the same plane as those being remapped very well. Notice the vines at the bottom left of the original image and how they were stretched in processing. This makes sense if we imagine the vines do live in the same plane as the side of the building, like graffiti painted on. Then, the vines appear to spread over a large horizontal length of the wall and when mapped, appear stretched.
+
+Choosing a different set of points in the output image, the picture in fig. \ref{fig:map2} was generated. Notice how it is possible to effectively zoom in using this remapping method.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{out2}
+	\caption{A different mapping.}
+	\label{fig:map2}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}

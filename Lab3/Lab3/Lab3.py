@@ -4,35 +4,26 @@
 # Perspective Transformations and Motion Tracking
 
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
-import bilinear_interp as interp
-import sys
+import lab3_funcs as lf
 
-#A = np.asarray([[1,8,3,65.66],
-#                [-46,-98,108,-1763.1],
-#                [5,12,-9,195.2],
-#                [63,345,-27,3625],
-#                [23,78,45,716.9],
-#                [-12,56,-8,339],
-#                [1,34,78,-25.5],
-#                [56,123,-5,1677.1]])
-#C = A[:,3]
-#A = A[:,0:-1]
-#print(f'A = {A}\n')
-#print(f'C = {C}\n')
-## compute pseudo inverse matrix
-#A_p = np.linalg.inv(A.T.dot(A)).dot(A.T)
-#print(f'A_p = {A_p}\n')
-## compute weighting coefficient vector
-#x = A_p.dot(C)
-#print(f'x = {x}\n')
-## compute mapped values
-#v = A.dot(x)
-#print(f'v = {v}\n')
-## compute mean-squared-error of solutions
-#mse = (abs(v-C))**2
-#print(f'MSE = {mse}')
+A = np.asarray([[1,8,3,65.66],
+                [-46,-98,108,-1763.1],
+                [5,12,-9,195.2],
+                [63,345,-27,3625],
+                [23,78,45,716.9],
+                [-12,56,-8,339],
+                [1,34,78,-25.5],
+                [56,123,-5,1677.1]])
+C = A[:,3]
+A = A[:,0:-1]
+print(f'A = {A}\n')
+print(f'C = {C}\n')
+
+# calculate linear regression
+linear_regression = lf.linReg(A, C)
+print(f'x = {linear_regression[0]}\n')
+print(f'MSE = {linear_regression[3]}\n')
 
 # build perspective lines to be corrected
 inputPoints = np.asarray([[750, 215],
@@ -70,50 +61,30 @@ for i in range(10):
 outputPoints = np.append(outputLine1, outputLine2, axis=0)
 print(f'outputPoints = {outputPoints}\n shape(outputPoints) = {np.shape(outputPoints)}\n')
 
-# build remapping matrix for calculation of H
-mapping = np.zeros([0, 8])
-for row in range(20):
-    ip1 = inputPoints[row, 0]
-    ip2 = inputPoints[row, 1]
-    op1 = outputPoints[row, 0]
-    op2 = outputPoints[row, 1]
-    arr = np.asarray([[ip1, ip2, 1, 0, 0, 0, -op1*ip1, -op1*ip2],
-                      [0, 0, 0, ip1, ip2, 1, -op2*ip1, -op2*ip2]])
-    mapping = np.append(mapping, arr, axis=0)
-print(f'mapping = {mapping}\n shape(mapping) = {np.shape(mapping)}\n')
-
-# calculate pseudo inverse to find H
-mapping_inv = np.linalg.inv(mapping.T.dot(mapping)).dot(mapping.T)
-outputPoints = np.reshape(outputPoints, [40, 1])
-print(f'outputPoints = {outputPoints}\n')
-
-# find H by taking the dot product of H* and output points
-H = mapping_inv.dot(outputPoints)
-print(f'shape(H) = {np.shape(H)}')
-H = np.append(H, 1)
-H = np.reshape(H, [3,3])
-print(f'H = {H}\n')
-H_inv = np.linalg.inv(H)
-
-# correct distortion of perspective image
+# correct distortion
 distImage = Image.open('PC_test_2.jpg')
 distImage = np.asarray(distImage)
-corrImage = np.zeros([np.shape(distImage)[0], np.shape(distImage)[1], 3])
-print('remapping pixels...')
-# take the dot product of H with each pixel in distorted image
-for y in range(np.shape(corrImage)[0]):
-    for x in range(np.shape(corrImage)[1]):
-        p = [x, y, 1]
-        v = H_inv.dot(p)
-        # calculate points in distorted image corresponding to corrected pixels
-        map = [v[0]/v[2], v[1]/v[2]]
-        # interpolate to find real pixel values
-        corrImage[y, x, :] = interp.bilinear_interp(map[0], map[1], distImage)
-    # print progress bar
-    progress = int(y*100/np.shape(corrImage)[0])
-    sys.stdout.write('{0}% complete...\r'.format(progress))
-    sys.stdout.flush()
+perspective_correct = lf.distortion_correction(distImage, inputPoints, outputPoints)
+
 # display and save image
-Image.fromarray(corrImage.astype(np.uint8)).show()
-Image.fromarray(corrImage.astype(np.uint8)).save('out1.jpg')
+Image.fromarray(perspective_correct[0].astype(np.uint8)).show()
+Image.fromarray(perspective_correct[0].astype(np.uint8)).save('out1.jpg')
 print('done')
+
+line = np.linspace(1080, 0, 10)
+y1 = 215
+y2 = 575
+# build output lines
+outputLine1 = np.zeros([10, 2])
+outputLine2 = np.zeros([10, 2])
+for i in range(10):
+    outputLine1[i] = [line[i], y1]
+    outputLine2[i] = [line[i], y2]
+# combine output lines into one vector of points
+outputPoints1 = np.append(outputLine1, outputLine2, axis=0)
+
+# correct distortion
+perspective_correct1 = lf.distortion_correction(distImage, inputPoints, outputPoints1)
+# display and save image
+Image.fromarray(perspective_correct1[0].astype(np.uint8)).show()
+Image.fromarray(perspective_correct1[0].astype(np.uint8)).save('out2.jpg')
