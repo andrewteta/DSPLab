@@ -93,6 +93,7 @@ print(f'shape(H) = {np.shape(H)}')
 H = np.append(H, 1)
 H = np.reshape(H, [3,3])
 print(f'H = {H}\n')
+H_inv = np.linalg.inv(H)
 
 # correct distortion of perspective image
 distImage = Image.open('PC_test_2.jpg')
@@ -103,7 +104,7 @@ print('remapping pixels...')
 for y in range(np.shape(corrImage)[0]):
     for x in range(np.shape(corrImage)[1]):
         p = [x, y, 1]
-        v = H.dot(p)
+        v = H_inv.dot(p)
         # calculate points in distorted image corresponding to corrected pixels
         map = [v[0]/v[2], v[1]/v[2]]
         # interpolate to find real pixel values
