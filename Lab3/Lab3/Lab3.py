@@ -5,6 +5,7 @@
 
 import numpy as np
 from PIL import Image
+import sys
 import lab3_funcs as lf
 
 A = np.asarray([[1,8,3,65.66],
@@ -17,8 +18,8 @@ A = np.asarray([[1,8,3,65.66],
                 [56,123,-5,1677.1]])
 C = A[:,3]
 A = A[:,0:-1]
-print(f'A = {A}\n')
-print(f'C = {C}\n')
+#print(f'A = {A}\n')
+#print(f'C = {C}\n')
 
 # calculate linear regression
 linear_regression = lf.linReg(A, C)
@@ -46,7 +47,7 @@ inputPoints = np.asarray([[750, 215],
                           [440, 495],
                           [420, 488],
                           [400, 483]])
-print(f'inputPoints = {inputPoints}\n')
+#print(f'inputPoints = {inputPoints}\n')
 
 # build output lines
 outputLine1 = np.zeros([10, 2])
@@ -59,7 +60,7 @@ for i in range(10):
 
 # combine output lines into one vector of points
 outputPoints = np.append(outputLine1, outputLine2, axis=0)
-print(f'outputPoints = {outputPoints}\n shape(outputPoints) = {np.shape(outputPoints)}\n')
+#print(f'outputPoints = {outputPoints}\n shape(outputPoints) = {np.shape(outputPoints)}\n')
 
 # correct distortion
 distImage = Image.open('PC_test_2.jpg')
@@ -69,7 +70,6 @@ perspective_correct = lf.distortion_correction(distImage, inputPoints, outputPoi
 # display and save image
 Image.fromarray(perspective_correct[0].astype(np.uint8)).show()
 Image.fromarray(perspective_correct[0].astype(np.uint8)).save('out1.jpg')
-print('done')
 
 line = np.linspace(1080, 0, 10)
 y1 = 215
@@ -88,3 +88,9 @@ perspective_correct1 = lf.distortion_correction(distImage, inputPoints, outputPo
 # display and save image
 Image.fromarray(perspective_correct1[0].astype(np.uint8)).show()
 Image.fromarray(perspective_correct1[0].astype(np.uint8)).save('out2.jpg')
+
+# Motion Tracking #
+lf.detect_motion('xi01.jpg', 'xi02.jpg', 16)
+lf.detect_motion_mae('xi01.jpg', 'xi02.jpg', 16)
+
+print('done')

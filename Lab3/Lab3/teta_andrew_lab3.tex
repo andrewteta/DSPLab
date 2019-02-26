@@ -411,23 +411,322 @@ Choosing a different set of points in the output image, the picture in fig. \ref
 	\label{fig:map2}
 \end{figure}
 
+\pagebreak
 
+\section{Motion Tracking}
+For "motion tracking" we will really be doing some motion estimation. By slicing up an image into small "chunks" or "blocks", we can perform a localized search for similar blocks within a specified range. 
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{motion_search}
+	\caption{Cartoon representation of a motion estimation localized search.}
+	\label{fig:search}
+\end{figure}
 
+We consider two frames of a video, $n$ and $n+1$. By looping over blocks of pixels in frame $n+1$, we can perform the search to find the minimum MSE for a nearby block and select that block to be used as a prediction of the motion that occurred.
 
+Starting with a pixel index and search range, the algorithm to do the motion estimation essentially slides the block into every possible position within the search range and calculates the MSE at that location. The location, MSE, and predicted block are returned, so a prediction image can be generated. 
 
+\pagebreak
 
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}[h]{0.7\textwidth}
+		\includegraphics[width=\textwidth]{xi01}
+		\caption{frame $n$}
+	\end{subfigure}
+	\par\medskip
+	\begin{subfigure}[h]{0.7\textwidth}
+		\includegraphics[width=\textwidth]{xi02}
+		\caption{frame $n+1$}
+	\end{subfigure}
+	\caption{Two frames of a video taken in the ISS.}
+	\label{fig:two_frames}
+\end{figure}
 
+The two frames we will use for motion estimation are shown in fig. \ref{fig:two_frames}. First, the result using MSE is shown.
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{vector_field}
+	\caption{The relative direction of motion for each block analyzed using MSE, represented as a vector field.}
+	\label{fig:vector}
+\end{figure}
 
+Looking closely at fig. \ref{fig:vector}, you can almost see the shape of each person in the frame and their slight motion between the two frames. The predicted motion determined by the search algorithm is shown in fig. \ref{fig:predicted}.
 
+\pagebreak
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{predicted}
+	\caption{Predicted motion for search using MSE.}
+	\label{fig:predicted}
+\end{figure}
 
+It is obvious that this search method isn't perfect, because there are some artifacts of the process around their eyes and especially near the mouth of the man in the center of the frame. Regardless, for an estimation, it isn't bad.
 
+\pagebreak
 
+Next, we look at the same process, but for mean absolute error (MAE). 
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{vector_field1}
+	\caption{The relative direction of motion for each block analyzed using MAE, represented as a vector field.}
+	\label{fig:vector1}
+\end{figure}
 
+Notice in fig. \ref{fig:vector1} that there are a few vectors with larger magnitude than in fig. \ref{fig:vector}. This is because small deviations are not scaled down in the MAE. Only the absolute difference is considered, so this version of the algorithm is more sensitive to changes, at the expense of possibly detecting noise more frequently. The predicted image is also shown in fig. \ref{fig:predicted1}, but there really are not any noticeable differences compared to the MSE version.
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{predicted1}
+	\caption{Predicted motion for search using MAE.}
+	\label{fig:predicted1}
+\end{figure}
 
+\pagebreak
+
+\section{Conclusion}
+Projection in linear algebra is a difficult concept! the transformations we used in this lab were very hard to follow and it was difficult to understand why we were computing some of these. Despite that, this was a really cool introduction to perspective correction and the idea of distortion manipulation and projection theory. I found this lab really challenging, but interesting. The motion detection algorithm was a lot easier to follow. 
+
+\pagebreak
+
+\section{Appendix}
+\subsection{A: Linear Regression}
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+def linReg(A, C):
+    # compute pseudo inverse matrix
+    A_p = np.linalg.inv(A.T.dot(A)).dot(A.T)
+    #print(f'A_p = {A_p}\n')
+    # compute weighting coefficient vector
+    x = A_p.dot(C)
+    #print(f'x = {x}\n')
+    # compute mapped values
+    v = A.dot(x)
+    #print(f'v = {v}\n')
+    # compute mean-squared-error of solutions
+    mse = (abs(v-C))**2
+    #print(f'MSE = {mse}')
+    
+    return x, v, A_p, mse
+\end{lstlisting}
+
+\pagebreak
+
+\subsection{B: Perspective Distortion Correction}
+\begin{lstlisting}[language=Python]
+import numpy as np
+import sys
+import bilinear_interp as interp
+
+def distortion_correction(imageIn, inPoints, outPoints):
+    # build remapping matrix for calculation of H
+    mapping = np.zeros([0, 8])
+    for row in range(20):
+        ip1 = inPoints[row, 0]
+        ip2 = inPoints[row, 1]
+        op1 = outPoints[row, 0]
+        op2 = outPoints[row, 1]
+        arr = np.asarray([[ip1, ip2, 1, 0, 0, 0, -op1*ip1, -op1*ip2],
+                          [0, 0, 0, ip1, ip2, 1, -op2*ip1, -op2*ip2]])
+        mapping = np.append(mapping, arr, axis=0)
+    #print(f'mapping = {mapping}\n shape(mapping) = {np.shape(mapping)}\n')
+
+    # calculate pseudo inverse to find H
+    mapping_inv = np.linalg.inv(mapping.T.dot(mapping)).dot(mapping.T)
+    outPoints = np.reshape(outPoints, [40, 1])
+    #print(f'outPoints = {outPoints}\n')
+
+    # find H by taking the dot product of H* and output points
+    H = mapping_inv.dot(outPoints)
+    #print(f'shape(H) = {np.shape(H)}')
+    H = np.append(H, 1)
+    H = np.reshape(H, [3,3])
+    #print(f'H = {H}\n')
+    H_inv = np.linalg.inv(H)
+
+    # correct distortion of perspective image
+    corrImage = np.zeros([np.shape(imageIn)[0], np.shape(imageIn)[1], 3])
+    print('remapping pixels...')
+    # take the dot product of H with each pixel in distorted image
+    for y in range(np.shape(corrImage)[0]):
+        for x in range(np.shape(corrImage)[1]):
+            p = [x, y, 1]
+            v = H_inv.dot(p)
+            # calculate points in distorted image corresponding to corrected pixels
+            map = [v[0]/v[2], v[1]/v[2]]
+            # interpolate to find real pixel values
+            corrImage[y, x, :] = interp.bilinear_interp(map[0], map[1], imageIn)
+        # print progress bar
+        progress = int(y*100/np.shape(corrImage)[0])
+        sys.stdout.write('{0}% complete...\r'.format(progress))
+        sys.stdout.flush()
+    print('\n')
+
+    return corrImage, H, imageIn
+\end{lstlisting}
+
+\pagebreak
+
+\subsection{C: Motion Detection}
+\begin{lstlisting}[language=Python]
+import me_method as me
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+import sys
+
+def detect_motion(frame1, frame2, blockSize):
+    im1 = np.asarray(Image.open(frame1))
+    im2 = np.asarray(Image.open(frame2))
+    im1_bw = np.asarray(Image.open(frame1).convert('L'), np.float)
+    im2_bw = np.asarray(Image.open(frame2).convert('L'), np.float)
+
+    rows = np.shape(im2)[0]
+    cols = np.shape(im2)[1]
+    blockSize = 16
+
+    predicted_image = np.zeros([rows, cols, 3], np.uint8)
+    MSE = np.zeros([rows, cols], np.float)
+    vectorCount = int((rows/blockSize) * (cols/blockSize))
+    U = np.zeros(vectorCount)
+    V = np.zeros(vectorCount)
+    X = np.zeros(vectorCount)
+    Y = np.zeros(vectorCount)
+    currIndex = 0
+    # loop over blocks
+    print('Estimating motion ... \n')
+    for row in range(0, rows, blockSize):
+        for col in range(0, cols, blockSize):
+            block = im2_bw[row:row + blockSize, col:col + blockSize]
+            motion_estimation = me.motion_match(row, col, 20, block, im1_bw, im1)
+            predicted_image[row:row + blockSize, col:col + blockSize] = motion_estimation[0]
+            MSE[row, col] = motion_estimation[1]
+            U[currIndex] = motion_estimation[3]
+            V[currIndex] = -motion_estimation[2]
+            X[currIndex] = int(col/blockSize)
+            Y[currIndex] = rows - int(row/blockSize)
+            currIndex += 1
+        progress = int((row*100)/rows)
+        sys.stdout.write('{0}% complete...\r'.format(progress))
+        sys.stdout.flush()
+    print('\n')
+    Image.fromarray(predicted_image.astype(np.uint8)).save('predicted.jpg')
+    plt.figure(dpi=170)
+    plt.quiver(X, Y, U, V)
+    plt.title("Motion Estimation")
+    plt.xlabel("Horizontal Block Number")
+    plt.ylabel("Vertical Block Number")
+    plt.ion()
+    plt.savefig('vector_field.png')
+
+    return 0
+\end{lstlisting}
+
+\pagebreak
+
+\subsection{D: Main}
+\begin{lstlisting}[language=Python]
+# Created by Andrew Teta
+# 2019/02/13
+# ECEN 4532 DSP Lab 3
+# Perspective Transformations and Motion Tracking
+
+import numpy as np
+from PIL import Image
+import sys
+import lab3_funcs as lf
+
+A = np.asarray([[1,8,3,65.66],
+                [-46,-98,108,-1763.1],
+                [5,12,-9,195.2],
+                [63,345,-27,3625],
+                [23,78,45,716.9],
+                [-12,56,-8,339],
+                [1,34,78,-25.5],
+                [56,123,-5,1677.1]])
+C = A[:,3]
+A = A[:,0:-1]
+#print(f'A = {A}\n')
+#print(f'C = {C}\n')
+
+# calculate linear regression
+linear_regression = lf.linReg(A, C)
+print(f'x = {linear_regression[0]}\n')
+print(f'MSE = {linear_regression[3]}\n')
+
+# build perspective lines to be corrected
+inputPoints = np.asarray([[750, 215],
+                          [675, 235],
+                          [625, 250],
+                          [575, 265],
+                          [535, 275],
+                          [500, 285],
+                          [475, 295],
+                          [445, 300],
+                          [425, 305],
+                          [405, 315],
+                          [745, 575],
+                          [670, 555],
+                          [615, 540],
+                          [565, 525],
+                          [530, 515],
+                          [495, 505],
+                          [468, 500],
+                          [440, 495],
+                          [420, 488],
+                          [400, 483]])
+#print(f'inputPoints = {inputPoints}\n')
+
+# build output lines
+outputLine1 = np.zeros([10, 2])
+outputLine2 = np.zeros([10, 2])
+line1 = np.linspace(750, 405, 10)
+line2 = np.linspace(750, 405, 10)
+for i in range(10):
+    outputLine1[i] = [line1[i], 305]
+    outputLine2[i] = [line2[i], 475]
+
+# combine output lines into one vector of points
+outputPoints = np.append(outputLine1, outputLine2, axis=0)
+#print(f'outputPoints = {outputPoints}\n shape(outputPoints) = {np.shape(outputPoints)}\n')
+
+# correct distortion
+distImage = Image.open('PC_test_2.jpg')
+distImage = np.asarray(distImage)
+perspective_correct = lf.distortion_correction(distImage, inputPoints, outputPoints)
+
+# display and save image
+Image.fromarray(perspective_correct[0].astype(np.uint8)).show()
+Image.fromarray(perspective_correct[0].astype(np.uint8)).save('out1.jpg')
+
+line = np.linspace(1080, 0, 10)
+y1 = 215
+y2 = 575
+# build output lines
+outputLine1 = np.zeros([10, 2])
+outputLine2 = np.zeros([10, 2])
+for i in range(10):
+    outputLine1[i] = [line[i], y1]
+    outputLine2[i] = [line[i], y2]
+# combine output lines into one vector of points
+outputPoints1 = np.append(outputLine1, outputLine2, axis=0)
+
+# correct distortion
+perspective_correct1 = lf.distortion_correction(distImage, inputPoints, outputPoints1)
+# display and save image
+Image.fromarray(perspective_correct1[0].astype(np.uint8)).show()
+Image.fromarray(perspective_correct1[0].astype(np.uint8)).save('out2.jpg')
+
+# Motion Tracking #
+lf.detect_motion('xi01.jpg', 'xi02.jpg', 16)
+lf.detect_motion_mae('xi01.jpg', 'xi02.jpg', 16)
+
+print('done')
+\end{lstlisting}
 
 \end{document}

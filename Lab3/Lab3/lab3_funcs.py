@@ -1,6 +1,9 @@
 import numpy as np
-import bilinear_interp as interp
+import matplotlib.pyplot as plt
+from PIL import Image
 import sys
+import bilinear_interp as interp
+import me_method as me
 
 def linReg(A, C):
     # compute pseudo inverse matrix
@@ -60,5 +63,98 @@ def distortion_correction(imageIn, inPoints, outPoints):
         progress = int(y*100/np.shape(corrImage)[0])
         sys.stdout.write('{0}% complete...\r'.format(progress))
         sys.stdout.flush()
+    print('\n')
 
     return corrImage, H, imageIn
+
+def detect_motion(frame1, frame2, blockSize):
+    im1 = np.asarray(Image.open(frame1))
+    im2 = np.asarray(Image.open(frame2))
+    im1_bw = np.asarray(Image.open(frame1).convert('L'), np.float)
+    im2_bw = np.asarray(Image.open(frame2).convert('L'), np.float)
+
+    rows = np.shape(im2)[0]
+    cols = np.shape(im2)[1]
+    blockSize = 16
+
+    predicted_image = np.zeros([rows, cols, 3], np.uint8)
+    MSE = np.zeros([rows, cols], np.float)
+    vectorCount = int((rows/blockSize) * (cols/blockSize))
+    U = np.zeros(vectorCount)
+    V = np.zeros(vectorCount)
+    X = np.zeros(vectorCount)
+    Y = np.zeros(vectorCount)
+    currIndex = 0
+    # loop over blocks
+    print('Estimating motion ... \n')
+    for row in range(0, rows, blockSize):
+        for col in range(0, cols, blockSize):
+            block = im2_bw[row:row + blockSize, col:col + blockSize]
+            motion_estimation = me.motion_match(row, col, 20, block, im1_bw, im1)
+            predicted_image[row:row + blockSize, col:col + blockSize] = motion_estimation[0]
+            MSE[row, col] = motion_estimation[1]
+            U[currIndex] = motion_estimation[3]
+            V[currIndex] = -motion_estimation[2]
+            X[currIndex] = int(col/blockSize)
+            Y[currIndex] = rows - int(row/blockSize)
+            currIndex += 1
+        progress = int((row*100)/rows)
+        sys.stdout.write('{0}% complete...\r'.format(progress))
+        sys.stdout.flush()
+    print('\n')
+    Image.fromarray(predicted_image.astype(np.uint8)).save('predicted.jpg')
+    plt.figure(dpi=170)
+    plt.quiver(X, Y, U, V)
+    plt.title("Motion Estimation")
+    plt.xlabel("Horizontal Block Number")
+    plt.ylabel("Vertical Block Number")
+    plt.ion()
+    plt.savefig('vector_field.png')
+
+    return 0
+
+def detect_motion_mae(frame1, frame2, blockSize):
+    im1 = np.asarray(Image.open(frame1))
+    im2 = np.asarray(Image.open(frame2))
+    im1_bw = np.asarray(Image.open(frame1).convert('L'), np.float)
+    im2_bw = np.asarray(Image.open(frame2).convert('L'), np.float)
+
+    rows = np.shape(im2)[0]
+    cols = np.shape(im2)[1]
+    blockSize = 16
+
+    predicted_image = np.zeros([rows, cols, 3], np.uint8)
+    MSE = np.zeros([rows, cols], np.float)
+    vectorCount = int((rows/blockSize) * (cols/blockSize))
+    U = np.zeros(vectorCount)
+    V = np.zeros(vectorCount)
+    X = np.zeros(vectorCount)
+    Y = np.zeros(vectorCount)
+    currIndex = 0
+    # loop over blocks
+    print('Estimating motion ... \n')
+    for row in range(0, rows, blockSize):
+        for col in range(0, cols, blockSize):
+            block = im2_bw[row:row + blockSize, col:col + blockSize]
+            motion_estimation = me.motion_match_mae(row, col, 20, block, im1_bw, im1)
+            predicted_image[row:row + blockSize, col:col + blockSize] = motion_estimation[0]
+            MSE[row, col] = motion_estimation[1]
+            U[currIndex] = motion_estimation[3]
+            V[currIndex] = -motion_estimation[2]
+            X[currIndex] = int(col/blockSize)
+            Y[currIndex] = rows - int(row/blockSize)
+            currIndex += 1
+        progress = int((row*100)/rows)
+        sys.stdout.write('{0}% complete...\r'.format(progress))
+        sys.stdout.flush()
+    print('\n')
+    Image.fromarray(predicted_image.astype(np.uint8)).save('predicted1.jpg')
+    plt.figure(dpi=170)
+    plt.quiver(X, Y, U, V)
+    plt.title("Motion Estimation")
+    plt.xlabel("Horizontal Block Number")
+    plt.ylabel("Vertical Block Number")
+    plt.ion()
+    plt.savefig('vector_field1.png')
+
+    return 0
