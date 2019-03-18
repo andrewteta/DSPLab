@@ -1,0 +1,11 @@
+\contentsline {section}{Introduction}{3}% 
+\contentsline {section}{\numberline {1}Introduction}{3}% 
+\contentsline {section}{\numberline {2}Background}{3}% 
+\contentsline {subsection}{\numberline {2.1}Analysis}{3}% 
+\contentsline {subsection}{\numberline {2.2}Synthesis}{3}% 
+\contentsline {section}{\numberline {3}Cosine Modulated Pseudo Quadrature Mirror Filter: Analysis}{4}% 
+\contentsline {subsection}{\numberline {3.1}The math}{4}% 
+\contentsline {subsection}{\numberline {3.2}Derivation of a faster way}{5}% 
+\contentsline {subsection}{\numberline {3.3}Frequency inversion}{6}% 
+\contentsline {subsection}{\numberline {3.4}Implementation}{7}% 
+\contentsline {section}{\numberline {4}Reconstruction: Synthesis}{13}% 

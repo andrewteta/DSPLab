@@ -2,7 +2,6 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import scipy.io.wavfile
 
 def load_c_taps( filename_path ):
   fd = open(filename_path, 'r')
@@ -21,29 +20,17 @@ def load_d_taps( filename_path ):
   return d
 
 def pqmf(input):
-    filename = str.split(input,'/')[-1]
-    filename = str.split(filename,'.')[0]
-    filepath = input
-
-    # read .wav file into numpy array and extract sampling frequency
-    inFile = scipy.io.wavfile.read(filepath)
-    print('Analyzing ' + filename + ' ... \n')
 
     # load window coefficients from file
     c_taps = load_c_taps('the_c_taps.txt')
 
-    # extract sample data and sampling frequency
-    data = inFile[1]
-    fs = inFile[0]
-
-    # extract first 5 seconds of .wav file
-    data = data[0 : int(5 * fs)]
-
     plt.figure(dpi=170)
-    plt.plot(data, linewidth=0.25)
+    plt.plot(c_taps)
+    plt.savefig('./figures/analysis/c_taps.png')
+    plt.close()
 
     # add zeros at end of array to make it reshapable into 32 cols
-    data = np.append(data, np.zeros(32 - (len(data) % 32)))
+    data = np.append(input, np.zeros(32 - (len(input) % 32)))
     # reshape into 32 sample length rows
     data = np.reshape(data, (-1, 32))
 
@@ -79,31 +66,19 @@ def pqmf(input):
         # undo frequency inversion and add to output array
         A[packet, :] = fInvert * S
 
-    # transpose and flatten to sort data into incrementing groups of subband coefficients
-    A = A.T.flatten()
-    # normalize
-    A = A / np.amax(A)
-
-    # plot sub-band coefficients
-    plt.figure(dpi=170)
-    plt.plot(A, linewidth=0.25)
-    plt.xlabel('Sample')
-    plt.ylabel('Magnitude')
-    plt.title('Sub-band coefficients for first 5 seconds of ' + filename + '.wav')
-    #plt.show()
-    plt.savefig('./figures/' + filename + '_sb_filt.png')
-    #plt.close()
-
     return A
 
-def ipqmf(input):
-    # add zeros at end of array to make it reshapable into 32 cols
-    data = np.append(input, np.zeros(32 - (len(input) % 32)))
-    # reshape into 32 sample length rows
-    data = np.reshape(data, (-1, 32))
+def ipqmf(input, subbands):
+
+    data = input
 
     # load window coefficients from file
     d_taps = load_d_taps('the_d_taps.txt')
+
+    plt.figure(dpi=170)
+    plt.plot(d_taps)
+    plt.savefig('./figures/synthesis/d_taps.png')
+    plt.close()
 
     # declare working array
     V = np.zeros(1024)
@@ -125,6 +100,8 @@ def ipqmf(input):
 
     # loop over coefficients in 32 sample chunks
     for packet in range(np.shape(data)[0]):
+        # filter output sub-bands
+        data[packet] = data[packet] * subbands
         # shift every element of V to the right by 64
         V = np.roll(V, 64)
         # compute reconstruction samples
@@ -138,10 +115,5 @@ def ipqmf(input):
         W = U * d_taps
         W = np.reshape(W, (16, -1))
         S[packet, :] = wFlat.dot(W)
-
-    # transpose and flatten to sort data into incrementing groups of subband coefficients
-    S = S.T.flatten()
-    # normalize
-    S = S / np.amax(S)
 
     return S

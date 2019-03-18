@@ -1,0 +1,56 @@
+\relax 
+\@writefile{toc}{\contentsline {section}{Introduction}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Analysis}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Synthesis}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Cosine Modulated Pseudo Quadrature Mirror Filter: Analysis}{4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}The math}{4}\protected@file@percent }
+\newlabel{eq:analysis_output}{{5}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A cartoon representation of $p_0$, the prototype filter used for analysis of a signal in MP3 encoding. This plot has no relevance to scale and is only a reference to the general shape of $p_0$ and its lowpass filter construction.\relax }}{4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:sinc}{{1}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Derivation of a faster way}{5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Plot of a 512 tap analysis filter, $C$, used in MP3 encoding.\relax }}{5}\protected@file@percent }
+\newlabel{fig:c_taps}{{2}{5}}
+\newlabel{eq:fast_analysis_output}{{16}{6}}
+\newlabel{eq:z}{{17}{6}}
+\newlabel{eq:y}{{18}{6}}
+\newlabel{eq:s}{{19}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Frequency inversion}{6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Spectrum inversion\relax }}{7}\protected@file@percent }
+\newlabel{fig:inversion}{{3}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Implementation}{7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Plot of samples vs. magnitude for first 5 seconds of a jazz song, used as input to our analysis.\relax }}{7}\protected@file@percent }
+\newlabel{fig:gilberto}{{4}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Spectral content of a piano melody. We see a small magnitude of very low frequencies, most of the energy concentrated in the low-mid frequency range, and almost no content at high frequency.\relax }}{9}\protected@file@percent }
+\newlabel{fig:analysis_sample1}{{5}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Spectral content of a dance floor beat. We see high energy density at very low frequencies and lots of noise at higher frequencies.\relax }}{9}\protected@file@percent }
+\newlabel{fig:analysis_sample2}{{6}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Spectral content of a sine wave. We see energy only between about 750 Hz and 1250 Hz.\relax }}{10}\protected@file@percent }
+\newlabel{fig:analysis_sine1}{{7}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Spectral content of a sine wave. We see energy only between 0 Hz and 750 Hz.\relax }}{10}\protected@file@percent }
+\newlabel{fig:analysis_sine2}{{8}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Spectral content of a classical track. There is good contribution from spectral bands at 0 Hz all the way up to about 5 kHz.\relax }}{11}\protected@file@percent }
+\newlabel{fig:analysis_handel}{{9}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Spectral content of a percussive recording. The energy is distributed fairly evenly across the frequency spectrum here.\relax }}{11}\protected@file@percent }
+\newlabel{fig:analysis_cast}{{10}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Spectral content of a jazz track. The first five seconds are very percussion heavy, most likely leading to the large spread of spectral content. Above about 16 kHz there is mostly noise.\relax }}{12}\protected@file@percent }
+\newlabel{fig:analysis_gilberto}{{11}{12}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Reconstruction: Synthesis}{13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Plot of reconstruction window $D$.\relax }}{13}\protected@file@percent }
+\newlabel{fig:d_taps}{{12}{13}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Plot of first 1000 samples of a simple sine wave input signal, sine1.wav. Observe the reconstructed signal is delayed by some amount.\relax }}{14}\protected@file@percent }
+\newlabel{fig:delay}{{13}{14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Reconstruction and delay shown for sample1.wav\relax }}{15}\protected@file@percent }
+\newlabel{fig:synthesis_sample1}{{14}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Reconstruction and delay shown for sample2.wav\relax }}{15}\protected@file@percent }
+\newlabel{fig:synthesis_sample2}{{15}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Reconstruction and delay shown for sine2.wav\relax }}{16}\protected@file@percent }
+\newlabel{fig:synthesis_sine2}{{16}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Reconstruction and delay shown for handel.wav\relax }}{16}\protected@file@percent }
+\newlabel{fig:synthesis_handel}{{17}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Reconstruction and delay shown for cast.wav\relax }}{17}\protected@file@percent }
+\newlabel{fig:synthesis_cast}{{18}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Reconstruction and delay shown for gilberto.wav\relax }}{17}\protected@file@percent }
+\newlabel{fig:synthesis_gilberto}{{19}{17}}
