@@ -276,7 +276,7 @@ and will also have shape (N,32).
 
 Transposing and flattening $A$, we can plot the sub-band analysis output.
 
-\pagebreak
+\clearpage
 
 \begin{figure}[ht]
 	\centering
@@ -338,6 +338,8 @@ Transposing and flattening $A$, we can plot the sub-band analysis output.
 \section{Reconstruction: Synthesis}
 Synthesis, or reconstruction of the MP3 codec is very similar to analysis. For each set of 32 sub-band coefficients, 32 audio samples are reconstructed. The algorithm will need to reverse the frequency inversion correction, so we will actually invert the signal again.
 
+\subsection{Calculations}
+
 This time, we will perform modulation with a matrix $N$ where,
 
 \begin{equation}
@@ -362,6 +364,8 @@ We will build U during each cycle and use it to compute the reconstruction. $V$ 
 	\includegraphics[scale=1]{synthesis/u_vect}
 \end{figure}
 
+\subsection{Implementation}
+
 The steps in reconstruction go as follows:
 
 \begin{enumerate}
@@ -372,14 +376,12 @@ The steps in reconstruction go as follows:
 \item Reshape $W$ into (16,-1) and store $wFlat \cdot W$ in output matrix
 \end{enumerate}
 
-\pagebreak
-
 Plotting the output of this reconstruction procedure, we can compare it to the original signal.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/sine1_delay}
-	\caption{Plot of first 1000 samples of a simple sine wave input signal, sine1.wav. Observe the reconstructed signal is delayed by some amount.}
+	\caption{Plot of first 1000 samples of a simple sine wave input signal, sine1.wav. Observe the reconstructed signal is delayed by some amount. \\ error = 2.62}
 	\label{fig:delay}
 \end{figure}
 
@@ -388,14 +390,14 @@ Through trial and error, attempting to minimize the error between the original s
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/sample1_delay}
-	\caption{Reconstruction and delay shown for sample1.wav}
+	\caption{Reconstruction and delay shown for sample1.wav \\ error = 0.24}
 	\label{fig:synthesis_sample1}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/sample2_delay}
-	\caption{Reconstruction and delay shown for sample2.wav}
+	\caption{Reconstruction and delay shown for sample2.wav \\ error = 1.32}
 	\label{fig:synthesis_sample2}
 \end{figure}
 
@@ -404,14 +406,14 @@ Through trial and error, attempting to minimize the error between the original s
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/sine2_delay}
-	\caption{Reconstruction and delay shown for sine2.wav}
+	\caption{Reconstruction and delay shown for sine2.wav \\ error = 1.47}
 	\label{fig:synthesis_sine2}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/handel_delay}
-	\caption{Reconstruction and delay shown for handel.wav}
+	\caption{Reconstruction and delay shown for handel.wav \\ error = 0.15}
 	\label{fig:synthesis_handel}
 \end{figure}
 
@@ -420,17 +422,276 @@ Through trial and error, attempting to minimize the error between the original s
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/cast_delay}
-	\caption{Reconstruction and delay shown for cast.wav}
+	\caption{Reconstruction and delay shown for cast.wav \\ error = 0.0}
 	\label{fig:synthesis_cast}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{synthesis/gilberto_delay}
-	\caption{Reconstruction and delay shown for gilberto.wav}
+	\caption{Reconstruction and delay shown for gilberto.wav \\ error = 0.065}
 	\label{fig:synthesis_gilberto}
 \end{figure}
 
+\clearpage
+
+The errors listed in each of the figures above are calculated as maximum error between the original samples and reconstructed samples for only the first 1000 samples. It is scaled based on the maximum sample value in each song, so the values appear much larger than they are if the data were normalized.
+
+\subsection{Selective sub-bands}
+Since MP3 is a compression algorithm, we are interested in reconstructing partial data less than perfectly. In the MP3 codec, this is implemented by applying a psychoacoustic model to select a subset of the 32 sub-bands based on human auditory sensitivity. For this lab, we will manually select some bands to leave out, attempting to limit the data used to reconstruct without negatively affecting the perception of music.
+
+For some tracks this is trivial, while for others it is a more complicated task. We will define a compression to be
+
+\begin{equation}
+\frac{\text{number of bands used to reconstruct}}{32}
+\end{equation}
+
+Selecting bands only where the frequency has large magnitude, the error was calculated as follows for each track:
+
+\begin{align*}
+cast &= 0.83 \\
+gilberto &= 229.88 \\
+handel &= 164.11 \\
+sample1 &= 115.99 \\
+sample2 &= 10376.86 \\
+sine1 &= 789.02 \\
+sine2 &= 6735.96
+\end{align*}
+
+Again, these errors are not scaled to normalization and a few are probably much larger than ideal, but this was not very analytic.
+
+\section{Conclusion}
+This lab was conceptually much more difficult than the previous labs and the code was really nothing new. I did learn a lot more about the DFT, DTFT, frequency analysis in general, and how all of that can be implemented in software. I feel like my foundation of Fourier analysis is much stronger now. This was a cool introduction to a real compression scheme.
+
 \pagebreak
+
+\section{Appendix}
+
+\subsection{PQMF}
+\begin{lstlisting}[language=Python]
+def pqmf(input):
+
+    # load window coefficients from file
+    c_taps = load_c_taps('the_c_taps.txt')
+
+    plt.figure(dpi=170)
+    plt.plot(c_taps)
+    plt.savefig('./figures/analysis/c_taps.png')
+    plt.close()
+
+    # add zeros at end of array to make it reshapable into 32 cols
+    data = np.append(input, np.zeros(32 - (len(input) % 32)))
+    # reshape into 32 sample length rows
+    data = np.reshape(data, (-1, 32))
+
+    # initialize working arrays for subband coefficient calculation
+    X = np.zeros(512)
+
+    # build filter matrix, M
+    M = np.zeros([32, 64])
+    for k in range(32):
+        for r in range(64):
+            M[k,r] = math.cos((( (2 * k) + 1) * (r - 16) * math.pi) / 64)
+
+    # subband coefficient output matrix
+    A = np.zeros_like(data)
+
+    # helping vectors
+    fInvert = np.array(16 * [1, -1])
+    zFlat = np.array(8 * [1])
+
+    # loop over entire song in 32 sample chunks
+    for packet in range(np.shape(data)[0]):
+        # shift every element of X to the right by 32
+        X = np.roll(X, 32)
+        # flip audio sample frame and place in X
+        X[0:32] = np.flip(data[packet])
+        # window X by C filter
+        Z = c_taps * X
+        # partial calculation
+        Z = np.reshape(Z, (8, 64))
+        Y = zFlat.dot(Z)
+        # calculate 32 subband samples
+        S = M.dot(Y)
+        # undo frequency inversion and add to output array
+        A[packet, :] = fInvert * S
+
+    return A
+\end{lstlisting}
+
+\pagebreak
+
+\subsection{IPQMF}
+\begin{lstlisting}[language=Python]
+def ipqmf(input, subbands):
+
+    data = input
+
+    # load window coefficients from file
+    d_taps = load_d_taps('the_d_taps.txt')
+
+    plt.figure(dpi=170)
+    plt.plot(d_taps)
+    plt.savefig('./figures/synthesis/d_taps.png')
+    plt.close()
+
+    # declare working array
+    V = np.zeros(1024)
+    U = np.zeros(512)
+    W = np.zeros(512)
+
+    # reconstruction coefficient output matrix
+    S = np.zeros_like(data)
+
+    # build reconstruction matrix, N
+    N = np.zeros([64, 32])
+    for i in range(64):
+        for k in range(32):
+            N[i,k] = math.cos((( (2 * k) + 1) * (16 + i) * math.pi) / 64)
+
+    # helping vectors
+    fInvert = np.array(16 * [1, -1])
+    wFlat = np.array(16 * [1])
+
+    # loop over coefficients in 32 sample chunks
+    for packet in range(np.shape(data)[0]):
+        # filter output sub-bands
+        data[packet] = data[packet]
+        # shift every element of V to the right by 64
+        V = np.roll(V, 64)
+        # compute reconstruction samples
+        V[0:64] = N.dot(fInvert * data[packet] * subbands)
+        # build window operand
+        for i in range(8):
+            for j in range(32):
+                U[i * 64 + j] = V[i * 128 + j]
+                U[i * 64 + 32 + j] = V[i * 128 + 96 + j]
+        # window
+        W = U * d_taps
+        W = np.reshape(W, (16, -1))
+        S[packet, :] = wFlat.dot(W)
+
+    return S
+\end{lstlisting}
+
+\pagebreak
+
+\subsection{Main}
+\begin{lstlisting}[language=Python]
+import lab04_funcs as lf
+from tkinter import filedialog
+import numpy as np
+import scipy.io.wavfile
+import matplotlib.pyplot as plt
+
+d_taps = lf.load_d_taps('the_d_taps.txt')
+
+# UI dialog to select files -> selection of multiple files will run all functions for each file
+files = filedialog.askopenfilenames()
+# Loop over files selected
+for f in files:
+    filename = str.split(f,'/')[-1]
+    filename = str.split(filename,'.')[0]
+    filepath = f
+
+    # read .wav file into numpy array and extract sampling frequency
+    fs, data = scipy.io.wavfile.read(filepath)
+    
+    # extract first 5 seconds of .wav file
+    data = data[0 : int(5 * fs)]
+
+    # plot input samples
+    plt.figure(dpi=170)
+    plt.plot(data, linewidth=0.25)
+    plt.title(filename + '.wav')
+    plt.savefig('./figures/' + filename + '.png')
+    plt.close()
+
+    # calculate sub-band filter coefficients
+    print('Analyzing ' + filename + ' ... \n')
+    coefficients = lf.pqmf(data)
+
+    # vector to filter subbands
+    thebands = np.ones(32)
+
+    # calculate reconstruction coefficients
+    print('Reconstructing ' + filename + ' ...\n')
+    recons = lf.ipqmf(coefficients, thebands)
+
+    # transpose and flatten to sort data into incrementing groups of subband coefficients
+    coefficients = coefficients.T.flatten()
+
+    # plot sub-band coefficients
+    plt.figure(dpi=170)
+    plt.plot(coefficients, linewidth=0.25)
+    xlocs = np.asarray(range(0, len(coefficients), int(len(coefficients)/10)))
+    xvals = np.asarray(xlocs/np.amax(range(len(coefficients)))*fs/2, int)
+    plt.xticks(xlocs, xvals, rotation=20)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Magnitude')
+    plt.title('Sub-band coefficients for first 5 seconds of ' + filename + '.wav')
+    plt.tight_layout()
+    plt.savefig('./figures/analysis/' + filename + '.png')
+    plt.close()
+
+    recons = recons.flatten()
+    
+    # plot reconstruction coefficients
+    plt.figure(dpi=170)
+    plt.plot(recons, linewidth=0.25)
+    plt.xlabel('Sample')
+    plt.ylabel('Magnitude')
+    plt.title('Reconstruction of first 5 seconds of ' + filename + '.wav')
+    #plt.show()
+    plt.savefig('./figures/synthesis/' + filename + '.png')
+    plt.close()
+
+    delay = 512 - 31;
+
+    # calculate error
+    r = recons[delay:1000 + delay]
+    d = data[0:1000]
+    error = np.amax(r - d)
+    print(filename + f' error = {error}')
+
+    # plot delay
+    plt.figure(dpi=170)
+    plt.plot(data[0:1000], linewidth=0.35)
+    plt.plot(recons[0:1000], linewidth=0.35)
+    if (filename == 'cast'):
+        plt.clf()
+        plt.plot(data[2850:3850], linewidth=0.35)
+        plt.plot(recons[2850:3850], linewidth=0.35)
+    plt.title('Original waveform vs. reconstructed')
+    plt.savefig('./figures/synthesis/' + filename + '_delay.png')
+    plt.close()
+    
+    thebands = np.ones(32)
+    coefficients = np.reshape(coefficients, (32, -1)).T
+    if filename == 'gilberto':
+        thebands[16:32] = 0
+    elif filename == 'sine1':
+        thebands[0] = 0
+        thebands[2:32] = 0
+    elif filename == 'sine2':
+        thebands[1:32] = 0
+    elif filename == 'handel':
+        thebands[8:32] = 0
+    elif filename == 'sample1':
+        thebands[8:32] = 0
+    elif filename == 'sample2':
+        thebands[15:32] = 0
+    selective_output = lf.ipqmf(coefficients, thebands)
+    selective_output = selective_output.flatten()
+    # calculate error
+    r = selective_output[delay:delay + 5000]
+    d = data[0:5000]
+    error = np.amax(r - d)
+    print(filename + f' selective error = {error}')
+
+
+print('done')
+
+\end{lstlisting}
 
 \end{document}

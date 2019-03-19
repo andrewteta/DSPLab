@@ -33,9 +33,6 @@ for f in files:
 
     # vector to filter subbands
     thebands = np.ones(32)
-    #for i in range(32):
-    #    if (i % 2):
-    #        thebands[i] = 0
 
     # calculate reconstruction coefficients
     print('Reconstructing ' + filename + ' ...\n')
@@ -75,6 +72,7 @@ for f in files:
     r = recons[delay:1000 + delay]
     d = data[0:1000]
     error = np.amax(r - d)
+    print(filename + f' error = {error}')
 
     # plot delay
     plt.figure(dpi=170)
@@ -84,10 +82,48 @@ for f in files:
         plt.clf()
         plt.plot(data[2850:3850], linewidth=0.35)
         plt.plot(recons[2850:3850], linewidth=0.35)
-    plt.title('Original waveform vs. reconstructed: error = %.2f' %error)
+    plt.title('Original waveform vs. reconstructed')
     plt.savefig('./figures/synthesis/' + filename + '_delay.png')
     plt.close()
+    
+    #calculate error when leaving out high frequency sub-bands
+    #errors = np.zeros(32)
+    #for band in range(31, 0, -1):
+    #    thebands[band:32] = 0
+    #    coefficients = np.reshape(coefficients, (32, -1)).T
+    #    selective_output = lf.ipqmf(coefficients, thebands)
+    #    selective_output = selective_output.flatten()
+    #    # calculate error
+    #    r = selective_output[delay:delay + 5000]
+    #    d = data[0:5000]
+    #    errors[band] = np.amax(r - d)
+    #plt.figure(dpi=170)
+    #plt.bar(range(32), errors)
+    #plt.title('Error as a function of high frequency bands excluded')
+    #plt.savefig('./figures/synthesis/' + filename + '_select.png')
 
+    thebands = np.ones(32)
+    coefficients = np.reshape(coefficients, (32, -1)).T
+    if filename == 'gilberto':
+        thebands[16:32] = 0
+    elif filename == 'sine1':
+        thebands[0] = 0
+        thebands[2:32] = 0
+    elif filename == 'sine2':
+        thebands[1:32] = 0
+    elif filename == 'handel':
+        thebands[8:32] = 0
+    elif filename == 'sample1':
+        thebands[8:32] = 0
+    elif filename == 'sample2':
+        thebands[15:32] = 0
+    selective_output = lf.ipqmf(coefficients, thebands)
+    selective_output = selective_output.flatten()
+    # calculate error
+    r = selective_output[delay:delay + 5000]
+    d = data[0:5000]
+    error = np.amax(r - d)
+    print(filename + f' selective error = {error}')
 
 
 print('done')

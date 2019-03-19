@@ -9,3 +9,11 @@
 \contentsline {subsection}{\numberline {3.3}Frequency inversion}{6}% 
 \contentsline {subsection}{\numberline {3.4}Implementation}{7}% 
 \contentsline {section}{\numberline {4}Reconstruction: Synthesis}{13}% 
+\contentsline {subsection}{\numberline {4.1}Calculations}{13}% 
+\contentsline {subsection}{\numberline {4.2}Implementation}{13}% 
+\contentsline {subsection}{\numberline {4.3}Selective sub-bands}{18}% 
+\contentsline {section}{\numberline {5}Conclusion}{18}% 
+\contentsline {section}{\numberline {6}Appendix}{19}% 
+\contentsline {subsection}{\numberline {6.1}PQMF}{19}% 
+\contentsline {subsection}{\numberline {6.2}IPQMF}{20}% 
+\contentsline {subsection}{\numberline {6.3}Main}{21}% 

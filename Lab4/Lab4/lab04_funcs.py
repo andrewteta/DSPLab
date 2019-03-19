@@ -101,11 +101,11 @@ def ipqmf(input, subbands):
     # loop over coefficients in 32 sample chunks
     for packet in range(np.shape(data)[0]):
         # filter output sub-bands
-        data[packet] = data[packet] * subbands
+        data[packet] = data[packet]
         # shift every element of V to the right by 64
         V = np.roll(V, 64)
         # compute reconstruction samples
-        V[0:64] = N.dot(fInvert * data[packet])
+        V[0:64] = N.dot(fInvert * data[packet] * subbands)
         # build window operand
         for i in range(8):
             for j in range(32):
