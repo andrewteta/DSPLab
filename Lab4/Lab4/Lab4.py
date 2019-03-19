@@ -71,6 +71,11 @@ for f in files:
 
     delay = 512 - 31;
 
+    # calculate error
+    r = recons[delay:1000 + delay]
+    d = data[0:1000]
+    error = np.amax(r - d)
+
     # plot delay
     plt.figure(dpi=170)
     plt.plot(data[0:1000], linewidth=0.35)
@@ -79,14 +84,9 @@ for f in files:
         plt.clf()
         plt.plot(data[2850:3850], linewidth=0.35)
         plt.plot(recons[2850:3850], linewidth=0.35)
-    plt.title('Original waveform vs. reconstructed')
+    plt.title('Original waveform vs. reconstructed: error = %.2f' %error)
     plt.savefig('./figures/synthesis/' + filename + '_delay.png')
     plt.close()
-
-    r = recons[delay:1000 + delay]
-    d = data[0:1000]
-    error = np.mean((r - d)**2)
-    print(f'maximum error = {error}')
 
 
 
