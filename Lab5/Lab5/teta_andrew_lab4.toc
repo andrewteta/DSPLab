@@ -1,0 +1,13 @@
+\contentsline {section}{Introduction}{3}% 
+\contentsline {section}{\numberline {1}Introduction}{3}% 
+\contentsline {section}{\numberline {2}Background}{3}% 
+\contentsline {subsection}{\numberline {2.1}Why Compress Images?}{3}% 
+\contentsline {subsection}{\numberline {2.2}Compression}{3}% 
+\contentsline {subsection}{\numberline {2.3}Encoder}{3}% 
+\contentsline {subsection}{\numberline {2.4}Decoder}{4}% 
+\contentsline {subsection}{\numberline {2.5}Important Compression Parameters}{4}% 
+\contentsline {section}{\numberline {3}Transform Coding}{4}% 
+\contentsline {subsection}{\numberline {3.1}Discrete Cosine Based Coders}{5}% 
+\contentsline {section}{\numberline {4}JPEG Compression Algorithm}{5}% 
+\contentsline {subsection}{\numberline {4.1}Forward and Inverse DCT}{5}% 
+\contentsline {subsection}{\numberline {4.2}Quantization and Inverse Quantization}{5}% 
