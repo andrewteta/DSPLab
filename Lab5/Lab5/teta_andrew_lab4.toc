@@ -6,8 +6,15 @@
 \contentsline {subsection}{\numberline {2.3}Encoder}{3}% 
 \contentsline {subsection}{\numberline {2.4}Decoder}{4}% 
 \contentsline {subsection}{\numberline {2.5}Important Compression Parameters}{4}% 
-\contentsline {section}{\numberline {3}Transform Coding}{4}% 
+\contentsline {section}{\numberline {3}Transform Coding}{5}% 
 \contentsline {subsection}{\numberline {3.1}Discrete Cosine Based Coders}{5}% 
-\contentsline {section}{\numberline {4}JPEG Compression Algorithm}{5}% 
-\contentsline {subsection}{\numberline {4.1}Forward and Inverse DCT}{5}% 
-\contentsline {subsection}{\numberline {4.2}Quantization and Inverse Quantization}{5}% 
+\contentsline {section}{\numberline {4}JPEG Compression Algorithm}{6}% 
+\contentsline {subsection}{\numberline {4.1}Forward and Inverse DCT}{6}% 
+\contentsline {subsection}{\numberline {4.2}Quantization and Inverse Quantization}{7}% 
+\contentsline {subsubsection}{\numberline {4.2.1}Inverse quantization}{8}% 
+\contentsline {subsection}{\numberline {4.3}Variable Length and Runlength Coding}{12}% 
+\contentsline {subsection}{\numberline {4.4}Entropy Coding}{12}% 
+\contentsline {section}{\numberline {5}Conclusion}{12}% 
+\contentsline {section}{\numberline {6}Appendix: Code}{13}% 
+\contentsline {subsection}{\numberline {6.1}Helper Functions}{13}% 
+\contentsline {subsection}{\numberline {6.2}Main}{16}% 

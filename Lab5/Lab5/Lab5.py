@@ -10,9 +10,21 @@ for f in files:
     filename = str.split(f,'/')[-1]
     filename = str.split(filename,'.')[0]
     filepath = f
+
     image = np.asarray(Image.open(f))
     Image.fromarray(image).save('figures/' + filename + '.png')
-    loss_factor = 8
+
+    loss_factor = 1
+    processed = lf.dctmgr(image, loss_factor)
+    x = lf.idctmgr(processed, loss_factor)
+    Image.fromarray(x.astype(np.uint8)).save('figures/' + filename + '_lf' + str(loss_factor) + '.png')
+
+    loss_factor = 10
+    processed = lf.dctmgr(image, loss_factor)
+    x = lf.idctmgr(processed, loss_factor)
+    Image.fromarray(x.astype(np.uint8)).save('figures/' + filename + '_lf' + str(loss_factor) + '.png')
+    
+    loss_factor = 20
     processed = lf.dctmgr(image, loss_factor)
     x = lf.idctmgr(processed, loss_factor)
     Image.fromarray(x.astype(np.uint8)).save('figures/' + filename + '_lf' + str(loss_factor) + '.png')

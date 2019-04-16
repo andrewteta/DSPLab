@@ -113,22 +113,17 @@ def izigzag(A):
 def dctmgr(image, loss_factor):
     processed_image = np.zeros_like(image)
     dct_array = np.zeros((64, int(np.shape(image)[0] * np.shape(image)[1] / 64)))
-    blockSize = 8
     Ny, Nx = np.shape(image)
-    nBlocksX = int(Nx/blockSize)
-    nBlocksY = int(Ny/blockSize)
+    nBlocksX = int(Nx/8)
+    nBlocksY = int(Ny/8)
     block = 0
-    #print(f'block before processing = \n{image[0:8,0:8]}\n')
-    #print(f'block after 2d dct = \n{dct_2D(image[0:8,0:8])}\n')
     # loop over 8x8 block cols
     for row in range(nBlocksX):
         for col in range(nBlocksY):
             indexX = col * 8
             indexY = row * 8
-            #print(f'indexX (col) = {indexX}')
-            #print(f'indexY (row) = {indexY}')
             # slice out an 8x8 block
-            pix = image[indexY : indexY + blockSize, indexX : indexX + blockSize]
+            pix = image[indexY : indexY + 8, indexX : indexX + 8]
             #print(f'input = \n{pix}\n')
             # take 2D DCT transform
             dct_pix = dct_2D(pix)
@@ -138,27 +133,18 @@ def dctmgr(image, loss_factor):
             #print(f'q = \n{q}\n')
             # re-order block in zigzag pattern and place in output array
             zz = zigzag(q)
-            dct_array[:, block] = zz
             #print(f'zz = \n{zz}\n')
-            #print(f'dct_array[i] = \n{dct_array[:, block]}\n')
-            #iz = izigzag(zz)
-            #print(f'izz = \n{iz}\n')
-            #iq = iquant_coeffs(iz, 1)
-            #print(f'iq = \n{iq}\n')
-            #y = idct_2D(iq)
-            #print(f'idct = \n{y}\n')
-            #print(f'block = {block}')
+            dct_array[:, block] = zz
             block += 1
-    # quantize values according to Q and loss factor
-    #output = quant_coeffs(dct_array, loss_factor)
-    output = dct_array
-    #print(f'first column after compression = \n{output[:,0]}\n')
+    output = enc_rbv(dct_array)
     return output
 
 def idctmgr(input, loss_factor):
+    # decode rbv
+    input = dec_rbv(input)
     nPix = int(np.shape(input)[1] / 8)
     output = np.zeros((nPix, nPix))
-    #coeffs = input
+    # reconstruct image
     for col in range(np.shape(input)[1]):
         #print(f'input col = \n{input[:,col]}\n')
         indexX = (col % 64) * 8
@@ -171,8 +157,8 @@ def idctmgr(input, loss_factor):
         idct = idct_2D(coeffs)
         #print(f'idct = \n{idct}\n')
         output[indexY:indexY + 8, indexX:indexX + 8] = idct
-        #Image.fromarray(output).show()
-        #print('\n')
+    # clip values outside range(0,255)
+    output = np.clip(output, 0, 255)
     return output
 
 def quant_coeffs(A, loss_factor):
@@ -193,21 +179,42 @@ def iquant_coeffs(A, loss_factor):
     return A
 
 def enc_rbv(A):
-    symb = np.zeros( (0,3), np.int )
+    symb = np.zeros((0,3), np.int16)
     for i in range(np.shape(A)[1]):
         # Handle DC coeff
-        symb = np.vstack( [symb, [0, 12, A[0,i]]] )
+        symb = np.vstack([symb, [0, 12, A[0,i]]])
 
         # Handle AC coeffs. nzi means non-zero indices
         tmp = A[:,i].flatten()
-        nzi = np.where( tmp[1:] != 0 ) [0]
+        nzi = np.where(tmp[1:] != 0)[0]
         prev_index = 0
         for k in range(len(nzi)):
             curr_index = nzi[k] + 1
             zeros = curr_index - prev_index - 1
-            symb = np.vstack([symb, [0,0,0]])
-        return symb
-    return Y
+            prev_index = curr_index
+            symb = np.vstack([symb, [zeros, 11, tmp[curr_index]]])
+        symb = np.vstack([symb, [0,0,0]])
+        #print(f'symb = \n{symb}\n')
+    return symb
 
-def dec_rbv(A):
-    return X
+def dec_rbv(symb):
+    output = np.zeros((64, 4096), np.int16)
+    EOB = np.asarray([0, 0, 0], np.int16)
+    symb_row = 0
+    row = 0
+    col = 0
+    zeros = 0
+    # loop over symb matrix to reconstruct blocks separated by EOB vectors
+    while symb_row < np.shape(symb)[0]:
+        if np.array_equal(symb[symb_row], EOB):
+            # EOB
+            row = 0
+            col += 1
+            symb_row += 1
+        else:
+            # reconstruct row of coefficient matrix
+            row += int(symb[symb_row, 0])
+            output[row, col] = symb[symb_row, 2]
+            row += 1
+            symb_row += 1
+    return output
