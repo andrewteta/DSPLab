@@ -1,7 +1,9 @@
 import numpy as np
 from sklearn import svm
-from tkinter import filedialog
+from sklearn.linear_model import LinearRegression
 import input_titanic_data as titIn
+import csv
+import matplotlib.pyplot as plt
 
 def predict(data, labels, svc):
     svc.fit(data, labels)
@@ -9,7 +11,62 @@ def predict(data, labels, svc):
     p_success = (1 - p_val[labels != p_val].size / labels.size) * 100
     return p_val, p_success
 
-#filepath = filedialog.askopenfilenames()[0]
+def linRegPredict(data, labels):
+    linReg = LinearRegression().fit(data, labels)
+    p_vals = linReg.predict(data)
+    mu = np.mean(labels)
+    tss = np.sum((labels - mu)**2)
+    rss = np.sum((labels - p_vals)**2)
+    ess = np.sum((p_vals - mu)**2)
+    r_squared = 1 - (rss / tss)
+    return p_vals, r_squared
+
+def importYacht(filename):
+    fd_r = open(filename, 'r')
+    datareader = csv.reader(fd_r, dialect='excel')
+    X = np.zeros( (0,6), np.float)
+    y = np.zeros(0, np.float)
+
+    # Read the labels from the file
+    a = next(datareader)
+
+    # extract data from csv into feature matrix and prediction vector
+    for ctr, line in enumerate(datareader):
+        # --------- X --------- #
+        # col_1 = longitudinal position center of buoyancy
+        # col_2 = prismatic coefficient
+        # col_3 = length-displacement ratio
+        # col_4 = beam-draught ratio
+        # col_5 = length-beam ratio
+        # col_6 = Froude number
+
+        # --------- y --------- #
+        # residuary resistance per unit weight of displacement
+        X = np.vstack( [X, np.array(line[0:-1], dtype=np.float64)] )
+        y = np.hstack( [y, np.array(line[-1:], dtype=np.float64)] )
+
+    return X, y
+
+# import data for yacht design into 2D table
+yacht_data, vals = importYacht('yacht_data.csv')
+
+# compute regression model for entire data set
+yhat, r2 = linRegPredict(yacht_data, vals)
+
+yhat_lpcb, r2_lpcb = linRegPredict(np.reshape(yacht_data[:,0], (-1,1)), vals)
+yhat_pc, r2_pc = linRegPredict(np.reshape(yacht_data[:,1], (-1,1)), vals)
+yhat_ldr, r2_ldr = linRegPredict(np.reshape(yacht_data[:,2], (-1,1)), vals)
+yhat_bdr, r2_bdr = linRegPredict(np.reshape(yacht_data[:,3], (-1,1)), vals)
+yhat_lbr, r2_lbr = linRegPredict(np.reshape(yacht_data[:,4], (-1,1)), vals)
+yhat_fn, r2_fn = linRegPredict(np.reshape(yacht_data[:,5], (-1,1)), vals)
+
+plt.figure(dpi=170)
+plt.plot(range(len(vals)), vals, linewidth=0.25, label='vals', marker='.')
+plt.plot(range(len(yhat)), yhat, linewidth=0.25, label='y_hat', marker='.')
+plt.legend()
+plt.show()
+
+print('yacht...')
 
 # create SVM module
 clf = svm.SVC(gamma='scale', kernel='linear')
@@ -55,5 +112,7 @@ print(f'percent correct (embarked) = {percent_success}')
 combData = np.hstack((ageData, classData, sexData))
 pred_val, percent_success = predict(combData, survived, clf)
 print(f'percent correct (age, sex, class) = {percent_success}')
+
+
 
 print('done')
