@@ -171,4 +171,213 @@ The basic building blocks of a neural network are "perceptrons" (fig. \ref{fig:n
 
 The process of training a neural network optimizes the parameters of the perceptrons in the network. The hidden layers shown in figure \ref{fig:nn} can be many layers deep and define the complexity of the network, but eventually narrow the input into a single classification at the output layer.
 
+\section{Procedure}
+The procedure for this lab is divided into three parts.
+
+\begin{enumerate}
+\item Binary classification using an SVM
+\item Continuous classification using linear regression
+\item Multiple classification using a neural network
+\end{enumerate}
+
+\subsection{SVM}
+For this portion of the lab, we will be using a training set of data, organized in multiple column fields of a \verb|.csv| file saved to the disk. 
+
+The data set we will be using is a collection of information about passengers who were on the Titanic when it sank. The binary classification we wish to predict is whether each passenger "survived" or "perished". For each passenger, the file contains the following columns:
+
+\begin{itemize}
+\item Class
+\item Survived
+\item Name
+\item Sex
+\item Age
+\item Siblings and Parents
+\item Parents and Children
+\item Ticket number
+\item Fare
+\item Cabin
+\item Location Embarked
+\item Boat
+\item Body Weight
+\item Destination
+\end{itemize}
+
+Utilizing the Python module, \verb|csv|, we can import this table and convert the fields into a \verb|numpy| matrix of support vectors and a vector of labels. Some entries of this \verb|.csv| table are in text format, others in integer, however all entries are initially imported as character arrays and so must be parsed correctly to prepare the data for processing in an SVM. Thus the data import procedure is:
+
+\begin{enumerate}
+\item Create \verb|csv| reader object.
+\item Iterate through \verb|.csv| file, element by element.
+\item Parse individual data fields and build support vectors for each instance
+\item Build support vector matrix and label vector
+\end{enumerate}
+
+We will not import all columns into our data matrix, but instead use only:
+
+\begin{itemize}
+\item Class
+\item Sex
+\item Age
+\item Siblings and Parents
+\item Parents and Children
+\item Fare
+\item Location Embarked
+\end{itemize}
+
+and use the "survived" column as our label vector.
+
+Next, we want to analyze this data using the techniques of an SVM. Rather than writing the complex algorithms from scratch, we will utilize a Python module, \verb|SVM| from the package \verb|sklearn|. Then, we feed our support vector matrix and label vector to the \verb|fit()| function to "train" our SVM. Finally, we can run some predictions using the \verb|predict()| function and analyze the performance of our machine. Again, listing the procedure:
+
+\begin{enumerate}
+\item Declare a \verb|sklearn| SVM object.
+\item \verb|fit()| the SVM to our data set, passing the label vector in.
+\item \verb|predict()| an outcome for each instance and measure performance.
+\end{enumerate}
+
+\subsubsection{Results}
+We started by training the SVM on all features. While the outcome was not bad, the process took a very long time, so we considered limiting the training data set to only three features. Defining the percentage of correctly predicted outcomes as $p$, we found:
+
+\begin{align*}
+p = 80.51\%
+\end{align*}
+
+To find the optimal features to use, while still achieving similar prediction performance, we ran the SVM training and prediction process on each feature individually. The results for each feature are shown below.
+
+\begin{center}
+ \begin{tabular}{||c | c||} 
+ \hline
+ Feature & Outcome Success (\%) \\ [0.5ex] 
+ \hline\hline
+ Fare & 66.00 \\ 
+ \hline
+ Class & 67.68 \\
+ \hline
+ Sex & 77.99 \\
+ \hline
+ Age & 66.08 \\
+ \hline
+ Siblings and Parents & 62.33 \\
+ \hline
+ Parents and Children & 64.32 \\
+ \hline
+ Location Embarked & 64.17 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+Having obtained some insight into which features are most correlated with the outcome, we recombined multiple features into our training set. Selecting the three features with best prediction accuracy, we found highest overall accuracy based on age, sex, and class to be:
+
+\begin{align*}
+p = 78.99\%
+\end{align*}\
+
+which is very close to the performance we had with all features considered. This is a much better solution, because the processing time was much less.
+
+\subsection{Linear Regression}
+Again, using \verb|sklearn|, this time we will use a module from the \verb|linear_model| package, called \verb|LinearRegression|. And, you guessed it, this module will help us perform linear regression. 
+
+Overall, the procedure is very similar to what we did for the SVM.
+
+\begin{itemize}
+\item Import training data from a \verb|.csv|
+	\begin{itemize}
+		\item Organize independent variables in a matrix and labels into a vector
+	\end{itemize}
+\item \verb|fit()| a model to the data, using the label vector
+\item \verb|predict| the outcome based on the input
+\item Statistically measure the performance
+\end{itemize}
+
+For this portion of the lab, we will be using linear regression to fit a model to a set of data containing a list of parameters used in the design of a yacht hull. These design parameters are suspected to contribute to the resulting resistance seen by the yacht against the water. The purpose of this model will then be to accurately measure which parameters contribute most heavily to yacht resistance and fit a model which could then be used to optimize a design.
+
+The design parameters considered are:
+
+\begin{itemize}
+\item Longitudinal Position Center of Buoyancy
+\item Prismatic Coefficient
+\item Length-Displacement Ratio
+\item Beam-Draught Ratio
+\item Length-Beam Ratio
+\item Froude Number
+\end{itemize}
+
+And, more formally, the value we wish to predict is the "Residuary resistance per unit weight of displacement."
+
+\subsubsection{Measuring Performance}
+It will be important to compare the performance of two regression model predictors and so we will define the two terms,
+
+\begin{itemize}
+\item Total Sum of Squares (TSS)
+\item Residual Sum of Squares (RSS)
+\end{itemize}
+
+Where,
+
+\begin{align*}
+TSS = \sum_{i=1}^M (y_i - \mu_y)^2
+\end{align*}
+
+and
+
+\begin{align*}
+RSS = \sum_{i=1}^M (y_i - \hat{y}_i)^2.
+\end{align*}
+
+Then, the "Fraction of Variance Unexplained" is defined as
+
+\begin{align*}
+FVU = \frac{RSS}{TSS}
+\end{align*}
+
+and the "Coefficient of Determination", $R^2$ as
+
+\begin{align*}
+R^2 = 1 - FVU = 1 - \frac{RSS}{TSS}.
+\end{align*}
+
+The value $R^2$ is essentially the fraction of variance of $y$ (the outcome) that is "explained" by the prediction. As follows, the quantity, $1-R^2$ is the fraction of variance that is "unexplained" by the prediction. Thus, we should attempt to maximize the value of $R^2$ to find the best prediction model.
+
+\subsubsection{Results}
+To begin, we \verb|fit()| a linear regression model to all six design parameters over a range of over 300 sample data points for each. Running the prediction over the training set, we found the value of $R^2 = 0.6575$. Figure \ref{fig:yacht} shows graphically what this outcome looks like. This $R^2$ value is not great, but there are a couple things to consider. First, not all the design parameters are guaranteed to have a significant effect on the outcome, and so could be introducing unnecessary model parameters. Secondly, and also more importantly, we have just trained this regression model with the assumption of a linear relationship between each of the design parameters and outcome.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{yacht}
+\caption{Comparison of labeled outcomes and predicted outcomes based on a linear regression learning method.}
+\label{fig:yacht}
+\end{figure}
+
+Considering first, that some parameters may not be contributing much, we ran the same procedure of fitting, predicting, and calculating $R^2$ for each parameter set alone. The results are shown in table \ref{table:yacht}.
+
+\begin{center}\label{table:yacht}
+ \begin{tabular}{||c | c||} 
+ \hline
+ Design Parameter & $R^2$ \\ [0.5ex] 
+ \hline\hline
+ Longitudinal Position Center of Buoyancy & $0.000372$ \\ 
+ \hline
+ Prismatic Coefficient & $0.000816$ \\
+ \hline
+ Length-Displacement Ratio & $8.8e^{-6}$ \\
+ \hline
+ Beam-Draught Ratio & $0.000154$ \\
+ \hline
+ Length-Beam Ratio & $1.05e^{-6}$ \\
+ \hline
+ Froude Number & $0.656$ \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+It is easy to see that most parameters do not contribute much to the variance of the outcome, with the highest contenders being:
+
+\begin{enumerate}
+\item Froude Number
+\item Prismatic Coefficient
+\item Longitudinal Position Center of Buoyancy
+\end{enumerate}
+
+Taking this into consideration, we ran the procedure again, using only these three parameters. As may have been expected, however, we found $R^2 = 0.6574$, with the remaining significant figures attributed to the other parameters. Since this obviously did not improve our prediction results, we need to look for another cause.
+
+Plotting individually...
+
 \end{document}

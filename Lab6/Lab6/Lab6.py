@@ -6,14 +6,20 @@ import csv
 import matplotlib.pyplot as plt
 
 def predict(data, labels, svc):
+    # fit SVM object to data set with labeled outcomes
     svc.fit(data, labels)
+    # run predictions on training set
     p_val = svc.predict(data)
+    # calculate percentage of success of predicted outcomes
     p_success = (1 - p_val[labels != p_val].size / labels.size) * 100
     return p_val, p_success
 
 def linRegPredict(data, labels):
+    # fit linear regression model to data set with labeled outcomes
     linReg = LinearRegression().fit(data, labels)
+    # run predictions on training set
     p_vals = linReg.predict(data)
+    # compute errors
     mu = np.mean(labels)
     tss = np.sum((labels - mu)**2)
     rss = np.sum((labels - p_vals)**2)
@@ -59,12 +65,52 @@ yhat_ldr, r2_ldr = linRegPredict(np.reshape(yacht_data[:,2], (-1,1)), vals)
 yhat_bdr, r2_bdr = linRegPredict(np.reshape(yacht_data[:,3], (-1,1)), vals)
 yhat_lbr, r2_lbr = linRegPredict(np.reshape(yacht_data[:,4], (-1,1)), vals)
 yhat_fn, r2_fn = linRegPredict(np.reshape(yacht_data[:,5], (-1,1)), vals)
+print(f'r2 = \n {r2_lpcb}\n{r2_pc}\n{r2_ldr}\n{r2_bdr}\n{r2_lbr}\n{r2_fn}\n')
+
+# best predictors:
+# fn    (col 5)
+# pc    (col 1)
+# lpcb  (col 0)
+
+best_data = np.delete(yacht_data, [2,3,4], axis=1)
+yhat_best_linear, r2_best_linear = linRegPredict(best_data, vals)
+print(np.shape(np.delete(yacht_data, [2,3,4], axis=1)))
+
+#plt.figure()
+#plt.scatter(10 * (np.exp(np.reshape(yacht_data[:,5], (-1,1)))), vals)
+#plt.title('Froude Number vs. Outcome')
+#plt.savefig('figures/fn_exp.png')
+
+#plt.figure()
+#plt.scatter( np.log(np.reshape(yacht_data[:,0], (-1,1))), vals)
+#plt.title('Longitudinal Position Center of Buoyancy vs. Outcome')
+#plt.savefig('figures/lpcb.png')
+
+#plt.figure()
+#plt.scatter(np.log(np.reshape(yacht_data[:,1], (-1,1))), vals)
+#plt.title('Prismatic Coefficient vs. Outcome')
+#plt.savefig('figures/pc.png')
+
+# try a few other models
+fn_exp = np.exp(20 * np.reshape(yacht_data[:,5], (-1,1)))
+yhat_fn_exp, r2_fn_exp = linRegPredict(np.reshape(fn_exp, (-1,1)), vals)
+print(f'exp(20*fn) r2 = {r2_fn_exp}')
+
+#lpcb_data = yacht_data[:,0]
+#pc_data = yacht_data[:,1]
+comb_data1 = np.exp(20 * np.delete(yacht_data, [2,3,4], axis=1))
+yhat_comb, r2_comb = linRegPredict(comb_data1, vals)
+print(f'combined r2 = {r2_comb}')
+
 
 plt.figure(dpi=170)
 plt.plot(range(len(vals)), vals, linewidth=0.25, label='vals', marker='.')
-plt.plot(range(len(yhat)), yhat, linewidth=0.25, label='y_hat', marker='.')
+plt.plot(range(len(yhat)), yhat_comb, linewidth=0.25, label='y_hat', marker='.')
 plt.legend()
-plt.show()
+plt.xlabel('Instances')
+plt.ylabel('Predicted Value')
+plt.title('Yacht Resistance')
+plt.savefig('figures/yacht_best.png')
 
 print('yacht...')
 
@@ -72,6 +118,10 @@ print('yacht...')
 clf = svm.SVC(gamma='scale', kernel='linear')
 # extract all titanic training data into data matrix and labels vector
 titanic_data, survived = titIn.get_titanic_all('titanic_tsmod.csv')
+
+# train and run predictions on all data
+pred_val, percent_success = predict(titanic_data, survived, clf)
+print(f'percent correct (all) = {percent_success}')
 
 # extract fare data column and run predictions
 fareData = np.reshape(titanic_data[:,-4], (-1,1))
