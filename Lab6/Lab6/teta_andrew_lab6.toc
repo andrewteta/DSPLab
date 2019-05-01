@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}Introduction}{3}% 
+\contentsline {section}{\numberline {2}Background}{3}% 
+\contentsline {subsection}{\numberline {2.1}Support Vector Machines}{3}% 
+\contentsline {subsection}{\numberline {2.2}Linear Regression}{4}% 
+\contentsline {subsection}{\numberline {2.3}Neural Networks}{5}% 
+\contentsline {section}{\numberline {3}Procedure}{5}% 
+\contentsline {subsection}{\numberline {3.1}SVM}{6}% 
+\contentsline {subsubsection}{\numberline {3.1.1}Results}{8}% 
+\contentsline {subsection}{\numberline {3.2}Linear Regression}{8}% 
+\contentsline {subsubsection}{\numberline {3.2.1}Measuring Performance}{9}% 
+\contentsline {subsubsection}{\numberline {3.2.2}Results}{9}% 
+\contentsline {subsection}{\numberline {3.3}Neural Network}{11}% 

@@ -378,6 +378,52 @@ It is easy to see that most parameters do not contribute much to the variance of
 
 Taking this into consideration, we ran the procedure again, using only these three parameters. As may have been expected, however, we found $R^2 = 0.6574$, with the remaining significant figures attributed to the other parameters. Since this obviously did not improve our prediction results, we need to look for another cause.
 
-Plotting individually...
+To gain some insight into the relationship between each parameter and the outcome, we plotted all data points for each, as shown in figure \ref{fig:r2highest}. It can be seen than the Prismatic coefficient and Longitudinal positional center of buoyancy do not hold a strong relationship. However, the Froude number appears to fit an exponential relationship.
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}[h]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{fn}
+		\caption{ }
+		\label{fig:fn}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[h]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{pc}
+		\caption{ }
+		\label{fig:pc}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[h]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{lpcb}
+		\caption{ }
+		\label{fig:lpcb}
+	\end{subfigure}
+	\caption{The relationship between input and output of the three highest scoring parameters.}
+	\label{fig:r2highest}
+\end{figure}
+
+It would be logical to assume a form $y = e^x$ for the Froude number. Taking $y = e^{fn}$, we found $R^2 = 0.6934$. After some trial and error, a quickly deduced "optimal" solution was found for $y = e^{20\cdot fn}$, resulting in $R^2 = 0.9856$. Then, for ease of calculation, we combined the Prismatic coefficient, Longitudinal positional center of buoyancy, and Froude number vectors into a single matrix, $M$ and calculated 
+
+\begin{align*}
+R^2 = 0.9870
+\end{align*}
+
+for
+\begin{align*}
+e^{20 \cdot M}.
+\end{align*}
+
+Additionally, the labels and prediction values were plotted together and are shown in figure \ref{fig:yacht_best}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{yacht_best}
+\caption{Residuary resistance per unit weight of displacement (labeled vs. predicted).}
+\label{fig:yacht_best}
+\end{figure}
+
+\subsection{Neural Network}
+
 
 \end{document}

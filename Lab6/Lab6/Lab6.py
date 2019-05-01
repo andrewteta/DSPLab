@@ -4,6 +4,9 @@ from sklearn.linear_model import LinearRegression
 import input_titanic_data as titIn
 import csv
 import matplotlib.pyplot as plt
+from scipy.io import arff
+import pickle
+from sklearn.neural_network import MLPClassifier
 
 def predict(data, labels, svc):
     # fit SVM object to data set with labeled outcomes
@@ -53,6 +56,54 @@ def importYacht(filename):
 
     return X, y
 
+def loadNNData():
+    # load data
+    print('loading NN data...')
+    X = pickle.load(open('mnist_X_uint8.sav', 'rb'))
+    y = pickle.load(open('mnist_y_uint8.sav', 'rb'))
+    print('done loading NN data')
+    X = X/255
+    return X, y
+
+def sortNNData(data, labels):
+    X_training = np.zeros((10, 6000, 784))
+    X_test = np.zeros((10, 1000, 784))
+    y_training = np.zeros((10, 6000, 1))
+    y_test = np.zeros((10, 1000, 1))
+
+    # loop over digits
+    print('sorting NNData...')
+    for digit in range(10):
+        imageIndex = 0
+        for label in range(len(labels)):
+            # find all elements equal to digit (in training set)
+            if labels[label] == digit and imageIndex < 6000:
+                X_training[digit, imageIndex, :] = data[label]
+                y_training[digit, imageIndex] = digit
+                imageIndex += 1
+            # find all elements equal to digit (in test set)
+            elif labels[label] == digit and (imageIndex >= 6000 and imageIndex < 7000):
+                X_test[digit, imageIndex - 6000, :] = data[label]
+                y_test[digit, imageIndex - 6000] = digit
+                imageIndex += 1
+    print('done sorting NNData')
+    return X_training, X_test, y_training, y_test
+
+# extract raw data for NN processing
+NNData = loadNNData()
+NNData_sorted = sortNNData(NNData[0], NNData[1])
+
+X_training = np.reshape(NNData_sorted[0], (-1,784))
+X_test = np.reshape(NNData_sorted[1], (-1,784))
+y_training = np.flatten(NNData_sorted[2])
+y_test = np.flatten(NNData_sorted[3])
+
+# Define and train NN model and make predictions
+mlp = MLPClassifier(hidden_layer_sizes=(100, 100), max_iter=400, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+mlp.fit(NNData_sorted[0], NNData_sorted[2])
+yhat = mlp.predict(NNData_sorted[1])
+
 # import data for yacht design into 2D table
 yacht_data, vals = importYacht('yacht_data.csv')
 
@@ -76,25 +127,35 @@ best_data = np.delete(yacht_data, [2,3,4], axis=1)
 yhat_best_linear, r2_best_linear = linRegPredict(best_data, vals)
 print(np.shape(np.delete(yacht_data, [2,3,4], axis=1)))
 
-#plt.figure()
-#plt.scatter(10 * (np.exp(np.reshape(yacht_data[:,5], (-1,1)))), vals)
-#plt.title('Froude Number vs. Outcome')
-#plt.savefig('figures/fn_exp.png')
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,5], (-1,1)), vals)
+plt.title('Froude Number vs. Outcome')
+plt.xlabel('FN value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/fn.png')
 
-#plt.figure()
-#plt.scatter( np.log(np.reshape(yacht_data[:,0], (-1,1))), vals)
-#plt.title('Longitudinal Position Center of Buoyancy vs. Outcome')
-#plt.savefig('figures/lpcb.png')
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,0], (-1,1)), vals)
+plt.title('Longitudinal Position Center of Buoyancy vs. Outcome')
+plt.xlabel('LPCB value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/lpcb.png')
 
-#plt.figure()
-#plt.scatter(np.log(np.reshape(yacht_data[:,1], (-1,1))), vals)
-#plt.title('Prismatic Coefficient vs. Outcome')
-#plt.savefig('figures/pc.png')
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,1], (-1,1)), vals)
+plt.title('Prismatic Coefficient vs. Outcome')
+plt.xlabel('PC value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/pc.png')
 
 # try a few other models
 fn_exp = np.exp(20 * np.reshape(yacht_data[:,5], (-1,1)))
 yhat_fn_exp, r2_fn_exp = linRegPredict(np.reshape(fn_exp, (-1,1)), vals)
 print(f'exp(20*fn) r2 = {r2_fn_exp}')
+
+fn_exp = np.exp(np.reshape(yacht_data[:,5], (-1,1)))
+yhat_fn_exp, r2_fn_exp = linRegPredict(np.reshape(fn_exp, (-1,1)), vals)
+print(f'exp(fn) r2 = {r2_fn_exp}')
 
 #lpcb_data = yacht_data[:,0]
 #pc_data = yacht_data[:,1]
