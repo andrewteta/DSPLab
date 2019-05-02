@@ -84,7 +84,7 @@ For all cases, we will utilize a set of labeled outcomes. As an example, for han
 \subsection{Support Vector Machines}
 A Support Vector Machine (SVM) is a method of binary classification through supervised learning. A model is built based on a training set which can assign a new data point to one classification or the other. It is easiest to understand the process and goal of fitting this model with a graphical representation. Figure \ref{fig:svm} shows that an SVM aims to find the optimal "line", called a \textit{hyperplane} between data points falling into either classification. 
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 \includegraphics[width=0.4\textwidth]{svm}
 \caption{Graphical representation of an SVM hyperplane. \\Credit: https://www.aitrends.com/ai-insider/support-vector-machines-svm-ai-self-driving-cars/}
@@ -155,14 +155,14 @@ y = \beta x + (\mu_x - \beta \mu_x), \quad	&\text{where $\beta = \rho \frac{\sig
 \subsection{Neural Networks}
 The basic building blocks of a neural network are "perceptrons" (fig. \ref{fig:nn}) which compute the dot product of its input vector $\vec{x}$, with its weights, $\vec{w}$. The result is passed through a threshold with respect to a bias, $b$ (fig. \ref{fig:nn1}).
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 \includegraphics[width=0.4\textwidth]{nn}
 \caption{Perceptrons shown on the left.}
 \label{fig:nn}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{nn1}
 \caption{Inside of a perceptron.}
@@ -170,6 +170,14 @@ The basic building blocks of a neural network are "perceptrons" (fig. \ref{fig:n
 \end{figure}
 
 The process of training a neural network optimizes the parameters of the perceptrons in the network. The hidden layers shown in figure \ref{fig:nn} can be many layers deep and define the complexity of the network, but eventually narrow the input into a single classification at the output layer.
+
+A good way to think about perceptrons is as if they are the neurons of neural networks. Each perceptron has input weights and a bias value which lead to a calculation of the output value. The output can be an input to many downstream perceptrons and as the network is trained, the perceptron's weights and biases are iteratively adjusted. Therefore, many passes through the training sequence are necessary.
+
+The process of finding the right weights and biases is solved using a \textit{gradient descent} algorithm - searching through a high-dimensional vector space for a solution, where a \textit{back-propagation} algorithm is used to compute the gradient. 
+
+Each classification ``bin" would be called a class, and the highest value of the output layer of perceptrons indicates the predicted class.
+
+We will not go into any more detail on the specifics of neural network processing in this lab, instead utilizing the \verb|sklearn| \verb|MLPClassifier| library function.
 
 \section{Procedure}
 The procedure for this lab is divided into three parts.
@@ -272,6 +280,8 @@ p = 78.99\%
 
 which is very close to the performance we had with all features considered. This is a much better solution, because the processing time was much less.
 
+\clearpage
+
 \subsection{Linear Regression}
 Again, using \verb|sklearn|, this time we will use a module from the \verb|linear_model| package, called \verb|LinearRegression|. And, you guessed it, this module will help us perform linear regression. 
 
@@ -339,7 +349,7 @@ The value $R^2$ is essentially the fraction of variance of $y$ (the outcome) tha
 \subsubsection{Results}
 To begin, we \verb|fit()| a linear regression model to all six design parameters over a range of over 300 sample data points for each. Running the prediction over the training set, we found the value of $R^2 = 0.6575$. Figure \ref{fig:yacht} shows graphically what this outcome looks like. This $R^2$ value is not great, but there are a couple things to consider. First, not all the design parameters are guaranteed to have a significant effect on the outcome, and so could be introducing unnecessary model parameters. Secondly, and also more importantly, we have just trained this regression model with the assumption of a linear relationship between each of the design parameters and outcome.
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{yacht}
 \caption{Comparison of labeled outcomes and predicted outcomes based on a linear regression learning method.}
@@ -376,25 +386,32 @@ It is easy to see that most parameters do not contribute much to the variance of
 \item Longitudinal Position Center of Buoyancy
 \end{enumerate}
 
-Taking this into consideration, we ran the procedure again, using only these three parameters. As may have been expected, however, we found $R^2 = 0.6574$, with the remaining significant figures attributed to the other parameters. Since this obviously did not improve our prediction results, we need to look for another cause.
+Taking this into consideration, we ran the procedure again, using only these three parameters. As may have been expected, however, we found $R^2 = 0.6574$, with the remaining significant figures attributed to the other parameters. Since this obviously did not improve our prediction results, we had to look for another cause.
 
 To gain some insight into the relationship between each parameter and the outcome, we plotted all data points for each, as shown in figure \ref{fig:r2highest}. It can be seen than the Prismatic coefficient and Longitudinal positional center of buoyancy do not hold a strong relationship. However, the Froude number appears to fit an exponential relationship.
 
-\begin{figure}[ht]
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{yacht_best}
+\caption{Residuary resistance per unit weight of displacement (labeled vs. predicted).}
+\label{fig:yacht_best}
+\end{figure}
+
+\begin{figure}
 	\centering
-	\begin{subfigure}[h]{0.4\textwidth}
+	\begin{subfigure}[h]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{fn}
 		\caption{ }
 		\label{fig:fn}
 	\end{subfigure}
 	\par\bigskip
-	\begin{subfigure}[h]{0.4\textwidth}
+	\begin{subfigure}[h]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{pc}
 		\caption{ }
 		\label{fig:pc}
 	\end{subfigure}
 	\par\bigskip
-	\begin{subfigure}[h]{0.4\textwidth}
+	\begin{subfigure}[h]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{lpcb}
 		\caption{ }
 		\label{fig:lpcb}
@@ -414,16 +431,396 @@ for
 e^{20 \cdot M}.
 \end{align*}
 
-Additionally, the labels and prediction values were plotted together and are shown in figure \ref{fig:yacht_best}
+Additionally, the labels and prediction values were plotted together and are shown in figure \ref{fig:yacht_best}. Not bad.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.6\textwidth]{yacht_best}
-\caption{Residuary resistance per unit weight of displacement (labeled vs. predicted).}
-\label{fig:yacht_best}
-\end{figure}
+\clearpage
 
 \subsection{Neural Network}
+For this portion of the lab, we will again use data stored on the disk to train an algorithm to predict an outcome. However, there are a few differences. First, we will be using raw binary data, sorting through it and passing it to an \verb|sklearn| neural network function for fitting and predicting. 
 
+This time, we begin with 70,000 images of hand-written numeric characters, all of which are labeled correctly. We will consider 60,000 of them as part of a training set and the remaining 10,000 as a test set.
+
+We will use the training set of data points and labels to \verb|fit()| a neural network model. Then, we will \verb|predict()| the outcome using the test set of data points.
+
+We will then \verb|score()| the result to find the percentage of correct predictions. As a more thorough method of quantifying classification accuracy, we will compute a \textit{confusion matrix}. In our case, the confusion matrix will measure the correct classification rate of each digit.
+
+For a given classification experiment, we will construct a $10 \times 10$ matrix whose rows represent the true digit, and whose columns are the digits as classified by the neural network. Thus, the entry $R(i,j)$ of the matrix is the number of digits of type $i$ classified as type $j$.
+
+% add section on cross-validation
+
+\subsubsection{Results}
+For this portion of the lab, all 70,000 images were encoded already in matrix format. Loading an ``X" matrix and ``y" vector using \verb|pickle| and taking the values of $X$ to be $X = X/255$, we next needed to sort the data into a more manageable format. 
+
+We wanted to construct both a training and test data set, each associated with labels. It was also helpful to have the data organized with digits in order, so we looped through the matrices, constructing $X\_training(10,6000,784)$, $X\_test(10, 1000, 784)$, $y\_training(10, 6000, 1)$, and $y\_test(10, 1000, 1)$ where the ten rows correspond to digits (sorted 0-9 ascending) and the columns are image indices. The third dimension (784) is related to $28 \times 28$ pixel raw image data. This format was chosen to both sort the data and make it easy to slice a selection of digits out.
+
+We reshaped the $X$ data into 2D matrices and flattened the $y$ vectors, so as to conform to the 2D input expected by the \verb|sklearn| \verb|MLPClassifier| function. This function has a number of parameters consisting of the number of perceptrons in each hidden layer, how many iterations to perform during training, and some other learning parameters and returns a neural network object. We called \verb|fit(X_training, y_training)| to obtain a model of our data, and then \verb|predict(X_test)| to test our algorithm.
+
+Using a single hidden layer of size 10 with a maximum of 25 iterations to train a model, we found the percentage of correct predictions to be $80.00\%$. The confusion matrix for this model is shown in figure \ref{table:cm}.
+
+\begin{figure}
+\centering
+\begin{align*}
+\begin{bmatrix}
+\\ \\0\\1\\2\\3\\4\\5\\6\\7\\8\\9\\
+\end{bmatrix}
+\begin{bmatrix}
+  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+  \\
+  876 & 0 & 4 & 2 & 1 & 8 & 7 & 1314 & 2 & 0\\
+  0 & 975 & 3 & 3 & 1 & 5 & 3 & 2 & 7 & 1\\
+  11 & 2 & 883 & 12 & 14 & 2 & 10 & 12 & 40 & 4\\
+  1 & 1 & 27 & 894 & 0 & 33 & 4 & 14 & 21 & 5\\
+  1 & 1 & 3 & 1 & 773 & 0 & 12 & 2 & 6 & 25\\
+  3 & 1 & 4 & 6 & 6 & 279 & 6 & 1 & 6 & 1\\
+  11 & 3 & 6 & 0 & 17 & 15 & 818 & 1 & 5 & 0\\
+  5 & 14 & 20 & 6 & 8 & 1 & 0 & 914 & 3 & 29\\
+  7 & 5 & 7 & 17 & 9 & 29 & 11 & 6 & 725 & 9\\
+  14 & 6 & 1 & 9 & 42 & 9 & 1 & 12 & 1 & 863\\
+\end{bmatrix}
+\end{align*}
+\caption{Confusion matrix for a neural network with a single hidden layer of size 10.}
+\label{table:cm}
+\end{figure}
+
+Notice, for each character, there is another character that is also predicted relatively often. 
+
+\begin{center}
+ \begin{tabular}{||c | c | c||} 
+ \hline
+ Correct character & Classified as & \% of the time \\ [0.5ex] 
+ \hline\hline
+ 0 & 7 & $131.4$ \\ 
+ \hline
+ 1 & 8 & $0.7$ \\
+ \hline
+ 2 & 8 & $4.0$ \\
+ \hline
+ 3 & 5 & $3.3$ \\
+ \hline
+ 4 & 9 & $3.23$ \\
+ \hline
+ 5 & 8 & $0.6$ \\
+ \hline
+ 6 & 4 & $1.7$ \\
+ \hline
+ 7 & 9 & $2.9$ \\
+ \hline
+ 8 & 5 & $2.9$ \\
+ \hline
+ 9 & 4 & $4.2$ \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+The extremely erroneous value for $0$ shows that this model was poorly trained.
+
+We tried running a few more tests with a single hidden layer of sizes 20, 30, and 50 and a maximum iteration count of 50 (table \ref{table:NN}).
+
+\begin{center}\label{table:NN}
+ \begin{tabular}{||c | c||} 
+ \hline
+ Hidden layer size & Percent correct \\ [0.5ex] 
+ \hline\hline
+ 20 & $81.51$ \\ 
+ \hline
+ 30 & $81.82$ \\
+ \hline
+ 50 & $82.09$ \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+Additionally, we ran a prediction with 2 hidden layers of size 50 (table \ref{table:NN1}).
+
+\begin{center}\label{table:NN1}
+ \begin{tabular}{||c | c||} 
+ \hline
+ Hidden layer size & Percent correct \\ [0.5ex] 
+ \hline\hline
+ 50 & $83.29$ \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+The results of this experiment show that increased hidden layers and iterations both help the neural network gain accuracy.
+
+\section{Conclusion}
+This lab was a very cool introduction to machine learning. I had no prior experience, so this opened my eyes to a whole new concept. I can think of so many ways this could be applied to real problems - even the yacht example was really interesting. The most impressive part has to be the Python \verb|sklearn| module because it does so much of the heavy lifting. I can imagine knowing how to effectively use the parameters in \verb|MMLPClassifier| is really important when working with a neural network to implement real solutions or validate results.
+
+\clearpage
+
+\section{Appendix: Code}
+\begin{lstlisting}[language=Python]
+import numpy as np
+from sklearn import svm
+from sklearn.linear_model import LinearRegression
+import input_titanic_data as titIn
+import csv
+import matplotlib.pyplot as plt
+from scipy.io import arff
+import pickle
+from sklearn.neural_network import MLPClassifier
+import lab6_funcs as lf
+
+def predict(data, labels, svc):
+    # fit SVM object to data set with labeled outcomes
+    svc.fit(data, labels)
+    # run predictions on training set
+    p_val = svc.predict(data)
+    # calculate percentage of success of predicted outcomes
+    p_success = (1 - p_val[labels != p_val].size / labels.size) * 100
+    return p_val, p_success
+
+def linRegPredict(data, labels):
+    # fit linear regression model to data set with labeled outcomes
+    linReg = LinearRegression().fit(data, labels)
+    # run predictions on training set
+    p_vals = linReg.predict(data)
+    # compute errors
+    mu = np.mean(labels)
+    tss = np.sum((labels - mu)**2)
+    rss = np.sum((labels - p_vals)**2)
+    ess = np.sum((p_vals - mu)**2)
+    r_squared = 1 - (rss / tss)
+    return p_vals, r_squared
+
+def importYacht(filename):
+    fd_r = open(filename, 'r')
+    datareader = csv.reader(fd_r, dialect='excel')
+    X = np.zeros( (0,6), np.float)
+    y = np.zeros(0, np.float)
+
+    # Read the labels from the file
+    a = next(datareader)
+
+    # extract data from csv into feature matrix and prediction vector
+    for ctr, line in enumerate(datareader):
+        # --------- X --------- #
+        # col_1 = longitudinal position center of buoyancy
+        # col_2 = prismatic coefficient
+        # col_3 = length-displacement ratio
+        # col_4 = beam-draught ratio
+        # col_5 = length-beam ratio
+        # col_6 = Froude number
+
+        # --------- y --------- #
+        # residuary resistance per unit weight of displacement
+        X = np.vstack( [X, np.array(line[0:-1], dtype=np.float64)] )
+        y = np.hstack( [y, np.array(line[-1:], dtype=np.float64)] )
+
+    return X, y
+
+def loadNNData():
+    # load data
+    print('loading NN data...')
+    X = pickle.load(open('mnist_X_uint8.sav', 'rb'))
+    y = pickle.load(open('mnist_y_uint8.sav', 'rb'))
+    print('done loading NN data')
+    X = X/255
+    return X, y
+
+def sortNNData(data, labels):
+    X_training = np.zeros((10, 6000, 784))
+    X_test = np.zeros((10, 1000, 784))
+    y_training = np.zeros((10, 6000, 1))
+    y_test = np.zeros((10, 1000, 1))
+
+    # loop over digits
+    print('sorting NNData...')
+    for digit in range(10):
+        imageIndex = 0
+        for label in range(len(labels)):
+            # find all elements equal to digit (in training set)
+            if labels[label] == digit and imageIndex < 6000:
+                X_training[digit, imageIndex, :] = data[label]
+                y_training[digit, imageIndex] = digit
+                imageIndex += 1
+            # find all elements equal to digit (in test set)
+            elif labels[label] == digit and (imageIndex >= 6000 and imageIndex < 7000):
+                X_test[digit, imageIndex - 6000, :] = data[label]
+                y_test[digit, imageIndex - 6000] = digit
+                imageIndex += 1
+    print('done sorting NNData')
+    return X_training, X_test, y_training, y_test
+
+def confusionMatrix(y, yhat):
+    confMatrix = np.zeros((10,10))
+    for i in range(len(y)):
+        confMatrix[ (int)(y[i]), (int)(yhat[i]) ] += 1
+    return confMatrix
+            
+
+# extract raw data for NN processing
+NNData = loadNNData()
+NNData_sorted = sortNNData(NNData[0], NNData[1])
+
+X_training = np.reshape(NNData_sorted[0], (-1,784))
+X_test = np.reshape(NNData_sorted[1], (-1,784))
+y_training = NNData_sorted[2].flatten()
+y_test = NNData_sorted[3].flatten()
+
+# Define and train NN model and make predictions
+mlp = MLPClassifier(hidden_layer_sizes=10, max_iter=25, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+mlp.fit(X_training, y_training)
+yhat = mlp.predict(X_test)
+cm = confusionMatrix(y_test, yhat)
+print(lf.bmatrix(cm.astype(np.int)))
+
+# Define a few more classifier objects for comparison
+mlp1_20 = MLPClassifier(hidden_layer_sizes=20, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_20.fit(X_training, y_training)
+yhat1_20 = mlp.predict(X_test)
+print(f'mlp1_20 score = {mlp1_20.score(X_test, y_test)}')
+
+mlp1_30 = MLPClassifier(hidden_layer_sizes=30, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_30.fit(X_training, y_training)
+yhat1_30 = mlp.predict(X_test)
+print(f'mlp1_30 score = {mlp1_30.score(X_test, y_test)}')
+
+mlp1_50 = MLPClassifier(hidden_layer_sizes=50, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_50.fit(X_training, y_training)
+yhat1_50 = mlp.predict(X_test)
+print(f'mlp1_50 score = {mlp1_50.score(X_test, y_test)}')
+
+# try with two hidden layers
+mlp2_50 = MLPClassifier(hidden_layer_sizes=(50, 50), max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp2_50.fit(X_training, y_training)
+yhat2_50 = mlp2_50.predict(X_test)
+print(f'mlp2_50 score = {mlp2_50.score(X_test, y_test)}')
+
+# import data for yacht design into 2D table
+yacht_data, vals = importYacht('yacht_data.csv')
+
+# compute regression model for entire data set
+yhat, r2 = linRegPredict(yacht_data, vals)
+
+yhat_lpcb, r2_lpcb = linRegPredict(np.reshape(yacht_data[:,0], (-1,1)), vals)
+yhat_pc, r2_pc = linRegPredict(np.reshape(yacht_data[:,1], (-1,1)), vals)
+yhat_ldr, r2_ldr = linRegPredict(np.reshape(yacht_data[:,2], (-1,1)), vals)
+yhat_bdr, r2_bdr = linRegPredict(np.reshape(yacht_data[:,3], (-1,1)), vals)
+yhat_lbr, r2_lbr = linRegPredict(np.reshape(yacht_data[:,4], (-1,1)), vals)
+yhat_fn, r2_fn = linRegPredict(np.reshape(yacht_data[:,5], (-1,1)), vals)
+print(f'r2 = \n {r2_lpcb}\n{r2_pc}\n{r2_ldr}\n{r2_bdr}\n{r2_lbr}\n{r2_fn}\n')
+
+# best predictors:
+# fn    (col 5)
+# pc    (col 1)
+# lpcb  (col 0)
+
+best_data = np.delete(yacht_data, [2,3,4], axis=1)
+yhat_best_linear, r2_best_linear = linRegPredict(best_data, vals)
+print(np.shape(np.delete(yacht_data, [2,3,4], axis=1)))
+
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,5], (-1,1)), vals)
+plt.title('Froude Number vs. Outcome')
+plt.xlabel('FN value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/fn.png')
+
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,0], (-1,1)), vals)
+plt.title('Longitudinal Position Center of Buoyancy vs. Outcome')
+plt.xlabel('LPCB value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/lpcb.png')
+
+plt.figure()
+plt.scatter(np.reshape(yacht_data[:,1], (-1,1)), vals)
+plt.title('Prismatic Coefficient vs. Outcome')
+plt.xlabel('PC value')
+plt.ylabel('Residuary resistance per unit weight of displacement')
+plt.savefig('figures/pc.png')
+
+# try a few other models
+fn_exp = np.exp(20 * np.reshape(yacht_data[:,5], (-1,1)))
+yhat_fn_exp, r2_fn_exp = linRegPredict(np.reshape(fn_exp, (-1,1)), vals)
+print(f'exp(20*fn) r2 = {r2_fn_exp}')
+
+fn_exp = np.exp(np.reshape(yacht_data[:,5], (-1,1)))
+yhat_fn_exp, r2_fn_exp = linRegPredict(np.reshape(fn_exp, (-1,1)), vals)
+print(f'exp(fn) r2 = {r2_fn_exp}')
+
+#lpcb_data = yacht_data[:,0]
+#pc_data = yacht_data[:,1]
+comb_data1 = np.exp(20 * np.delete(yacht_data, [2,3,4], axis=1))
+yhat_comb, r2_comb = linRegPredict(comb_data1, vals)
+print(f'combined r2 = {r2_comb}')
+
+
+plt.figure(dpi=170)
+plt.plot(range(len(vals)), vals, linewidth=0.25, label='vals', marker='.')
+plt.plot(range(len(yhat)), yhat_comb, linewidth=0.25, label='y_hat', marker='.')
+plt.legend()
+plt.xlabel('Instances')
+plt.ylabel('Predicted Value')
+plt.title('Yacht Resistance')
+plt.savefig('figures/yacht_best.png')
+
+print('yacht...')
+
+# create SVM module
+clf = svm.SVC(gamma='scale', kernel='linear')
+# extract all titanic training data into data matrix and labels vector
+titanic_data, survived = titIn.get_titanic_all('titanic_tsmod.csv')
+
+# train and run predictions on all data
+pred_val, percent_success = predict(titanic_data, survived, clf)
+print(f'percent correct (all) = {percent_success}')
+
+# extract fare data column and run predictions
+fareData = np.reshape(titanic_data[:,-4], (-1,1))
+pred_val, percent_success = predict(fareData, survived, clf)
+print(f'percent correct (fare) = {percent_success}')
+
+# extract class data columns and run predictions
+classData = titanic_data[:,0:3]
+pred_val, percent_success = predict(classData, survived, clf)
+print(f'percent correct (class) = {percent_success}')
+
+# extract sex data column and run predictions
+sexData = np.reshape(titanic_data[:,3], (-1,1))
+pred_val, percent_success = predict(sexData, survived, clf)
+print(f'percent correct (sex) = {percent_success}')
+
+# extract age data columns and run predictions
+ageData = titanic_data[:,4:85]
+pred_val, percent_success = predict(ageData, survived, clf)
+print(f'percent correct (age) = {percent_success}')
+
+# extract siblings/parents data columns and run predictions
+sibspData = titanic_data[:,85:94]
+pred_val, percent_success = predict(sibspData, survived, clf)
+print(f'percent correct (sibsp) = {percent_success}')
+
+# extract parents/children data columns and run predictions
+parchData = titanic_data[:,94:104]
+pred_val, percent_success = predict(parchData, survived, clf)
+print(f'percent correct (parch) = {percent_success}')
+
+# extract parents/children data columns and run predictions
+embarkedData = titanic_data[:,105:108]
+pred_val, percent_success = predict(embarkedData, survived, clf)
+print(f'percent correct (embarked) = {percent_success}')
+
+# extract highest prediction value data columns and run predictions
+combData = np.hstack((ageData, classData, sexData))
+pred_val, percent_success = predict(combData, survived, clf)
+print(f'percent correct (age, sex, class) = {percent_success}')
+
+
+
+print('done')
+
+\end{lstlisting}
 
 \end{document}

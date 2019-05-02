@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.io import arff
 import pickle
 from sklearn.neural_network import MLPClassifier
+import lab6_funcs as lf
 
 def predict(data, labels, svc):
     # fit SVM object to data set with labeled outcomes
@@ -89,20 +90,59 @@ def sortNNData(data, labels):
     print('done sorting NNData')
     return X_training, X_test, y_training, y_test
 
+def confusionMatrix(y, yhat):
+    confMatrix = np.zeros((10,10))
+    for i in range(len(y)):
+        confMatrix[ (int)(y[i]), (int)(yhat[i]) ] += 1
+    return confMatrix
+            
+
 # extract raw data for NN processing
 NNData = loadNNData()
 NNData_sorted = sortNNData(NNData[0], NNData[1])
 
 X_training = np.reshape(NNData_sorted[0], (-1,784))
 X_test = np.reshape(NNData_sorted[1], (-1,784))
-y_training = np.flatten(NNData_sorted[2])
-y_test = np.flatten(NNData_sorted[3])
+y_training = NNData_sorted[2].flatten()
+y_test = NNData_sorted[3].flatten()
 
 # Define and train NN model and make predictions
-mlp = MLPClassifier(hidden_layer_sizes=(100, 100), max_iter=400, alpha=1e-4,
+mlp = MLPClassifier(hidden_layer_sizes=10, max_iter=25, alpha=1e-4,
                     solver='sgd', verbose=10, tol=1e-4, random_state=1)
-mlp.fit(NNData_sorted[0], NNData_sorted[2])
-yhat = mlp.predict(NNData_sorted[1])
+mlp.fit(X_training, y_training)
+yhat = mlp.predict(X_test)
+cm = confusionMatrix(y_test, yhat)
+print(lf.bmatrix(cm.astype(np.int)))
+
+# Define a few more classifier objects for comparison
+mlp1_20 = MLPClassifier(hidden_layer_sizes=20, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_20.fit(X_training, y_training)
+yhat1_20 = mlp.predict(X_test)
+print(f'mlp1_20 score = {mlp1_20.score(X_test, y_test)}')
+
+mlp1_30 = MLPClassifier(hidden_layer_sizes=30, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_30.fit(X_training, y_training)
+yhat1_30 = mlp.predict(X_test)
+print(f'mlp1_30 score = {mlp1_30.score(X_test, y_test)}')
+
+mlp1_50 = MLPClassifier(hidden_layer_sizes=50, max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp1_50.fit(X_training, y_training)
+yhat1_50 = mlp.predict(X_test)
+print(f'mlp1_50 score = {mlp1_50.score(X_test, y_test)}')
+
+# try with two hidden layers
+mlp2_50 = MLPClassifier(hidden_layer_sizes=(50, 50), max_iter=50, alpha=1e-4,
+                    solver='sgd', verbose=10, tol=1e-4, random_state=1)
+
+mlp2_50.fit(X_training, y_training)
+yhat2_50 = mlp2_50.predict(X_test)
+print(f'mlp2_50 score = {mlp2_50.score(X_test, y_test)}')
 
 # import data for yacht design into 2D table
 yacht_data, vals = importYacht('yacht_data.csv')
